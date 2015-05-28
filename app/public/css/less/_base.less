@@ -1,0 +1,26 @@
+// Global vars and styles
+
+.display-flex() {
+	display: -ms-flexbox;
+ 	display: -webkit-flex;
+	display: flex;
+}
+
+.flex(@grow; @shrink; @basis) {
+	-webkit-flex: @grow @shrink @basis;
+	-ms-flex: @grow @shrink @basis;
+	flex: @grow @shrink @basis;
+}
+
+.flex-flow(@direction; @wrap: nowrap) {
+    -webkit-flex-flow: @direction @wrap;
+    -ms-flex-flow: @direction @wrap;
+    flex-flow: @direction @wrap;
+}
+
+// styles
+
+.horizontal-margin {
+	width: 100%;
+	.flex(0, 1, 5px);
+}
