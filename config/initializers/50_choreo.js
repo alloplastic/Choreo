@@ -16,6 +16,8 @@ module.exports = function choreoInitializer() {
 	}
 
 	partials["editor"] =  "choreo/editor";
+	partials["player"] =  "choreo/player";
+	partials["code-editor"] =  "choreo/code-editor";
 
 	if (needSet) this.set('partials', partials);
 };

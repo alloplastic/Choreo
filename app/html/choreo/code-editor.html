@@ -1,0 +1,22 @@
+<!-- the choreo module for visually editing code -->
+
+<xml id="toolbox" style="display: none">
+  <block type="controls_if"></block>
+  <block type="controls_repeat_ext"></block>
+  <block type="logic_compare"></block>
+  <block type="math_number"></block>
+  <block type="math_arithmetic"></block>
+  <block type="text"></block>
+  <block type="text_print"></block>
+</xml>
+
+<div class="code-editor">
+</div>
+
+<!-- Blockly stuff; TBD: need a custom integration with their localized text -->
+<script src="/lib/blockly/blockly_compressed.js"></script>
+<script src="/lib/blockly/blocks_compressed.js"></script>
+<script src="/lib/blockly/msg/js/en.js"></script>
+
+<!-- backing code -->
+<script src="/js/choreo/code-editor.js"></script>
