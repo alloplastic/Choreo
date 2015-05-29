@@ -6,8 +6,6 @@
 
 	$(document).ready(function() {
 
-		// DOM is ready; put initialization here
-
 	});
 
 	// menu management

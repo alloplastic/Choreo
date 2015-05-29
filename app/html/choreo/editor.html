@@ -43,8 +43,8 @@
 			 		<span>{{#__}}choreo__Info{{/__}}</span>
 				</div>
 				<div class="horizontal-margin"></div>
-				<div class="workspace-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		<span>{{#__}}choreo__Workspace{{/__}}</span>
+				<div id="blocklyArea" class="workspace-pane-content ui-widget ui-widget-content ui-corner-all">
+			 		{{> code-editor }}
 				</div>
 				<div class="horizontal-margin"></div>
 			</div>
@@ -56,7 +56,7 @@
  			<div class="player-pane">
 				<div class="horizontal-margin"></div>
 				<div class="player-pane-content">
-			 		<p>{{#__}}choreo__Player{{/__}}</p>
+			 		{{> player }}
 				</div>
 			</div>
 
