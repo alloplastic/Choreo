@@ -24,6 +24,8 @@ module.exports = function routes() {
 
 	// all choreo-specific routes; TBD: would be nice if Locomotive could load this from a file.
 
+	this.match('stubAPI/games/:name', { controller: 'stubAPI', action: 'getGame' });
+
 	this.namespace('choreo', function() {
 
 	//	this.root({ controller: 'editor', action: 'main' });

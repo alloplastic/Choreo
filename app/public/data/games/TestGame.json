@@ -1,0 +1,17 @@
+{
+	"id": "a_game_for_testing_during_development",
+	"name": "Test Game",
+	"scenes": [{
+		"id": "unique_id",
+		"kits": [{
+			"id": "Kit2dGamePhaser",
+			"entities": [{
+				"id": "unique_id",
+				"type": "EPhaserSprite",
+				"images": [],
+				"spritesheet": "",
+				"animations": []
+			}]
+		}]
+	}]
+}

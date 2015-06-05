@@ -29,11 +29,24 @@ cp app/locales/fr/choreo.json ../choreo-web/app/locales/fr
 
 cp config/initializers/50_choreo.js ../choreo-web/config/initializers
 
-# TBD: developer must ensure that editor-specific routes from /config/routes.js make it into the web site's 
-#      routes file.
+# THEN, manually check the following:
 
-# TBD: check _base.less for any generic styles being used by the editor that don't exist on the web site.
+# developer must ensure that editor-specific routes from /config/routes.js make it into the web site's 
+# routes file.
 
-# TBD: In piecemeal fashion, the web site should replace some editor "api" routes with its own (e.g. to save
-#      a file).  Editor api's should likely remain in /controllers/choreo/api.js (or wherever they end up),
-#      since some of them likely can work the same in both contexts.
+# check _base.less for any generic styles being used by the editor that don't exist on the web site.
+
+# In piecemeal fashion, the web site should replace some editor "api" routes with its own (e.g. to save
+# a file).  Editor api's should likely remain in /controllers/choreo/api.js (or wherever they end up),
+# since some of them likely can work the same in both contexts.
+
+# cross-check dependencies and versions in package.json, as well as /public/lib.
+
+# check the environments, such as all.js, for new global variables or configuration
+
+# check /public/js/site/home.js for client-side global vars like window.choreo.apiRoot.
+
+# replace these resources with server-side equivalents:
+#    /controllers/stubAPI_controller.js
+#    /public/data
+

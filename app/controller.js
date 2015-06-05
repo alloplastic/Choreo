@@ -5,9 +5,11 @@
  * 
  */
 
-var locomotive = require('locomotive')
-,	ParentController = locomotive.Controller
-,	i18n = require('../config/extensions/i18n-namespace');
+var locomotive = require('locomotive');
+var ParentController = locomotive.Controller;
+var i18n = require('../config/extensions/i18n-namespace');
+var Q = require('q');
+var request = require("request");
 
 //Begin Parent Controller
 	ParentController.parentOf = function(AppController, requireLoggedIn, requireNotLoggedIn){		
@@ -141,14 +143,37 @@ ParentController.__processPage = function() {
 	self.is500 = template(500);
 };
 
-    /**
-     * Utility function to prepare no cache headers; TBD: move to a utils module?
-     */
-    ParentController.__addNoCacheHeaders = function() {
-        // disable caching for content files
-        this.__res.header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
-        this.__res.header("Expires", -1);
-        this.__res.header("Pragma", "no-cache");
-    };
+	/**
+	 * Utility function to prepare no cache headers; TBD: move to a utils module?
+	 */
+	ParentController.__addNoCacheHeaders = function() {
+		// disable caching for content files
+		this.__res.header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+		this.__res.header("Expires", -1);
+		this.__res.header("Pragma", "no-cache");
+	};
+
+	/**
+	 * Promise-based request
+	 */
+	ParentController.__request = function(requestObj) {
+ 
+		var deferred = Q.defer();
+		
+		request(requestObj, function(err, res, body) {
+
+			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
+
+			if (typeof body !== 'undefined' && !err) {
+				//Parse result into JSON
+				var result = JSON.parse(body);				
+				deferred.resolve(result);
+			} else {
+				deferred.reject({status: "error"});
+			}
+		});
+		
+		return deferred.promise;
+	};
 	
 module.exports = ParentController;

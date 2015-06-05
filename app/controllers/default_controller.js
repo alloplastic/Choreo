@@ -31,7 +31,6 @@ var DefaultController = new (require('locomotive').Controller)()
 		this.__res.json({result: "thanks"});
 	};
 
-
 	/**
 	 * After the controller's functions are created, before() and after() methods can be registered with
 	 * Locomotive; these will be called before and after particular routes are handled.  '*' is a valid wildcard.
