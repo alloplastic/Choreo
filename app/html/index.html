@@ -3,10 +3,18 @@
 <!-- extend this file to build a web app around the Choreo editor -->
 
 <html lang="{{language}}">
+
 	<head>
 		{{> head }}
 		<meta name="format-detection" content="telephone=no">
 	</head>
+
+	<script>
+		window.choreo = window.choreo || {};
+		window.choreo.apiRoot = '{{apiRoot}}';
+		window.choreo.fileRoot = '{{fileRoot}}';
+		window.choreo.gameAssetRoot = '{{gameAssetRoot}}';
+	</script>
 
 	<script src="/js/site/home.js"></script>
 
@@ -15,4 +23,5 @@
 	<body class="choreo-web">
 		{{> editor }}
 	</body>
+	
 </html>

@@ -1,6 +1,43 @@
-<div class="player">
-	Choreo Player
+<div id="{{uniqueName}}" class="player">
 </div>
 
 <script src="/lib/JS-interpreter/acorn_interpreter.js"></script>
+
 <script src="/js/choreo/player.js"></script>
+
+<script>
+
+	function {{uniqueName}}() {
+
+		var options = {};
+		options.elementId = '{{uniqueName}}';
+
+		if (window.choreo == null) window.choreo = {};
+		if (window.choreo.players == null) window.choreo.players = {};
+		if (window.choreo.jsFilesLoaded == null) window.choreo.jsFilesLoaded = {};
+
+		var newPlayer = new ChoreoPlayer(options);
+		newPlayer.apiRoot = '{{apiRoot}}';
+		newPlayer.fileRoot = '{{fileRoot}}';
+		newPlayer.gameAssetRoot = '{{gameAssetRoot}}' + '{{gameId}}/assets/';
+
+		window.choreo.players['{{gameId}}'] = newPlayer;
+		window.choreo.player = newPlayer;
+
+		// TBD: uniqueName would be a better index, but using the gameId allows for
+		// easier mashups on target pages.
+
+		if (document.readyState == 'complete') {
+			newPlayer.loadGame('{{gameId}}');
+		} else {
+			document.addEventListener("DOMContentLoaded", function(event) {   // all but IE 8 supports this
+	  			setTimeout(function() {
+	  				newPlayer.loadGame('{{gameId}}');
+	  			}, 300);  // let the player catch the DOM-loaded event and set its state before we try to load a game.
+			});
+		}		
+	}
+
+	{{uniqueName}}();
+
+</script>

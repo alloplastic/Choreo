@@ -132,6 +132,7 @@ ParentController.__processPage = function() {
 		return function () {
 			return function (text, render) {
 				if (self.__res.statusCode == code) {
+					console.log("PROCESS PAGE text = " + text)
 					return render ? render(text) : text;
 				}
 				return "";
@@ -143,16 +144,16 @@ ParentController.__processPage = function() {
 	self.is500 = template(500);
 };
 
-	/**
-	 * Utility function to prepare no cache headers; TBD: move to a utils module?
-	 */
-	ParentController.__addNoCacheHeaders = function() {
-		// disable caching for content files
-		this.__res.header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
-		this.__res.header("Expires", -1);
-		this.__res.header("Pragma", "no-cache");
-	};
-
+    /**
+     * Utility function to prepare no cache headers; TBD: move to a utils module?
+     */
+    ParentController.__addNoCacheHeaders = function() {
+        // disable caching for content files
+        this.__res.header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+        this.__res.header("Expires", -1);
+        this.__res.header("Pragma", "no-cache");
+    };
+	
 	/**
 	 * Promise-based request
 	 */
@@ -170,6 +171,30 @@ ParentController.__processPage = function() {
 				deferred.resolve(result);
 			} else {
 				deferred.reject({status: "error"});
+			}
+		});
+		
+		return deferred.promise;
+	};
+
+	/**
+	 * Promise-based request
+	 */
+	ParentController.__requestRaw = function(requestObj) {
+ 
+		var deferred = Q.defer();
+		
+		request(requestObj, function(err, res, body) {
+
+			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
+
+//			console.log("code = " + statusCode + "\nerr = " + err + "\nbody = " + body);
+
+			// success on 2xx and 3xx HTTP responses
+			if (statusCode && statusCode < 400) {
+				deferred.resolve(body);
+			} else {
+				deferred.reject("");
 			}
 		});
 		

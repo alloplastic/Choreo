@@ -1,0 +1,16 @@
+{
+	"id": "TestGame",
+	"name": "Test Game",
+	"firstScene": "SceneOne",
+	"scenes": [{
+		"id": "SceneOne",
+		"kits": ["Kit2dGamePhaser"],
+		"entities": [{
+			"id": "Logo",
+			"type": "EPhaserSprite",
+			"images": ["phaser.png"],
+			"spritesheet": "",
+			"animations": []
+		}]
+	}]
+}
