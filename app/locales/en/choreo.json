@@ -13,5 +13,11 @@
 	"Layers": "Layers",
 	"Galllery": "Galllery",
 	"Gallery": "Gallery",
-	"Properties": "Properties"
+	"Properties": "Properties",
+	"File": "File",
+	"New": "New",
+	"Save": "Save",
+	"Load": "Load",
+	"Export to Desktop": "Export to Desktop",
+	"Export to Mobile": "Export to Mobile"
 }

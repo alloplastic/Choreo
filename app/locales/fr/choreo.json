@@ -11,5 +11,12 @@
 	"Workspace": "Workspace",
 	"Player": "Player",
 	"Gallery": "Gallery",
-	"Galllery": "Galllery"
+	"Galllery": "Galllery",
+	"File": "File",
+	"Properties": "Properties",
+	"New": "New",
+	"Save": "Save",
+	"Load": "Load",
+	"Export to Desktop": "Export to Desktop",
+	"Export to Mobile": "Export to Mobile"
 }

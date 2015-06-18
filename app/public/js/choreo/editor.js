@@ -92,8 +92,48 @@
 
 		$('html').click(function() {
 			//Hide any visible menus if a click propagates up to the body
+			$( ".file-menu").hide();
 			$( ".language-menu").hide();
 		});
+
+		$( ".file-menu").menu({
+			select: function( event, ui ) {
+				$(this).hide();
+				if (event.toElement != null) {
+					switch(event.toElement.id) {
+						case "menu_file_new":
+							console.log("NEW");
+							break;
+						case "menu_file_save":
+							console.log("SAVE");
+							break;
+						case "menu_file_load":
+							console.log("LOAD");
+							break;
+						case "menu_file_export_to_desktop":
+							console.log("EXPORT TO DESKTOP");
+							break;
+						case "menu_file_export_to_mobile":
+							console.log("EXPORT TO MOBILE");
+							break;
+					}
+				}
+			}
+		});
+
+		$( ".file-button" )
+		  .button()
+		  .click(function( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+			var menu = $( ".file-menu");
+			menu.position({
+				my: "left top",
+				at: "left bottom",
+				of: ".file-button"
+			});
+			menu.show();
+		  });
 
 		$( ".language-menu").menu({
 			select: function( event, ui ) {
