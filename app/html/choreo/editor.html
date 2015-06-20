@@ -3,8 +3,8 @@
 	<div class="menu-bar-pane">
 		<div class="horizontal-margin"></div>
 		<div class="menu-bar">
- 			<button class="file-button">{{#__}}choreo__File{{/__}}</button>
- 			<button class="language-button">{{#__}}choreo__Language{{/__}}</button>
+			<button class="file-button">{{#__}}choreo__File{{/__}}</button>
+			<button class="language-button">{{#__}}choreo__Language{{/__}}</button>
 		</div>
 	</div>
 
@@ -12,24 +12,37 @@
 
 		<div class="left-column">
 
- 			<div class="layers-pane">
+			<div class="layers-pane">
+
 				<div class="horizontal-margin"></div>
-				<div class="layers-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		<p>{{#__}}choreo__Layers{{/__}}</p>
+
+				<div class="layers-pane-tabs">
+					<ul>
+						<li><a href="#layers-pane-tab-1">{{#__}}choreo__One{{/__}}</a></li>
+						<li><a href="#layers-pane-tab-2"> + </a></li>
+					</ul>
+					<div id="layers-pane-tab-1">
+						<div class="layers-pane-content ui-widget ui-widget-content ui-corner-all">
+							<p>{{#__}}choreo__Layers{{/__}}</p>
+						</div>
+					</div>
+					<div id="layers-pane-tab-2">
+					</div>
 				</div>
+
 			</div>
 			
 			<div class="kit-pane">
 				<div class="horizontal-margin"></div>
 				<div class="kit-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		<p>{{#__}}choreo__Kit{{/__}}</p>
+					<p>{{#__}}choreo__Kit{{/__}}</p>
 				</div>
 			</div>
 
 			<div class="gallery-pane">
 				<div class="horizontal-margin"></div>
 				<div class="gallery-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		<p>{{#__}}choreo__Gallery{{/__}}</p>
+					<p>{{#__}}choreo__Gallery{{/__}}</p>
 				</div>
 				<div class="horizontal-margin"></div>
 			</div>
@@ -41,11 +54,11 @@
 			<div class="workspace-pane">
 				<div class="horizontal-margin"></div>
 				<div class="workspace-info-pane  ui-widget ui-widget-content ui-corner-all">
-			 		<span>{{#__}}choreo__Info{{/__}}</span>
+					<span>{{#__}}choreo__Info{{/__}}</span>
 				</div>
 				<div class="horizontal-margin"></div>
 				<div id="blocklyArea" class="workspace-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		{{> code-editor }}
+					{{> code-editor }}
 				</div>
 				<div class="horizontal-margin"></div>
 			</div>
@@ -54,10 +67,10 @@
 
 		<div class="right-column">
 
- 			<div class="player-pane">
+			<div class="player-pane">
 				<div class="horizontal-margin"></div>
 				<div class="player-pane-content">
-			 		{{> player }}
+					{{> player }}
 				</div>
 			</div>
 
@@ -65,11 +78,11 @@
 			<div class="properties-pane">
 				<div class="horizontal-margin"></div>
 				<div class="properties-info-pane ui-widget ui-widget-content ui-corner-all">
-			 		<span>{{#__}}choreo__Info{{/__}}</span>
+					<span>{{#__}}choreo__Info{{/__}}</span>
 				</div>
 				<div class="horizontal-margin"></div>
 				<div class="properties-pane-content ui-widget ui-widget-content ui-corner-all">
-			 		<span>{{#__}}choreo__Properties{{/__}}</span>
+					<span>{{#__}}choreo__Properties{{/__}}</span>
 				</div>
 				<div class="horizontal-margin"></div>
 			</div>
@@ -94,12 +107,12 @@
 </div>
 
 <!--	
-    <div class="page-container">
-        {{> header }}
-        <div class="home-page">
-            <p>{{#__}}choreo__Choreo Editor{{/__}}</p>
-        </div>
-    </div>
+	<div class="page-container">
+		{{> header }}
+		<div class="home-page">
+			<p>{{#__}}choreo__Choreo Editor{{/__}}</p>
+		</div>
+	</div>
 </div>
 {{> footer}}
 

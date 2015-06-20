@@ -1,7 +1,7 @@
 {
 	"id": "",
+	"choreoVersion": 1,
 	"name": "New Game",
-	"scenes": {
-		"kits": []
-	}
+	"firstScene": "ooga",
+	"scenes": []
 }

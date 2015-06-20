@@ -1,55 +1,88 @@
 // A page-specific JavaScript template
 
-(function ($) {
+//(function ($) {
 
-	// TBD: is this how we should handle client-side communication?
 
-	window.choreo.editor = this;
+	$ = jQuery;
 
-	// TBD: really should define an editor class
-	window.choreo.editor.loadGame = function(gameData) {
-		
-		// TBD: destroy old player, build new player
+	if (!ChoreoEditor) {
 
-		if (window.choreo.player) {
-			window.choreo.player.closeGame();
+		var ChoreoEditor = function (options) {
+			options = options || {};
+
+			this.apiRoot = options.apiRoot || window.choreo.apiRoot || '/';
+			this.fileRoot = options.fileRoot || window.choreo.fileRoot || '/';
+
 		}
 
-		var self = this;
-		setTimeout(function() {
-			self.buildPlayerForGame(gameData);
-		}, 2000);
+		ChoreoEditor.prototype.loadGame = function(id) {
+
+			$.getJSON( this.apiRoot + "games/" + id, function(data) {
+				if (data != null && data.status != 'error') {
+					window.choreo.editor.loadGameData(data);
+				}
+			});
+
+		}
+		// TBD: really should define an editor class
+		ChoreoEditor.prototype.loadGameData = function(gameData) {
+			
+			// We don't completely destroy old players since they are pretty lightweight and since
+			// their SDK downloads can serve as a cache for other players.
+
+			if (window.choreo.player) {
+				window.choreo.player.closeGame();
+			}
+
+			// TBD: determine first scene and first entity and load them into the UI components
+			window.choreo.codeEditor.loadEntityCode(null);
+
+			var self = this;
+			setTimeout(function() {
+				self.buildPlayerForGame(gameData);
+			}, 2000);
 
 
-//		if (gameData.scenes != null && gameData.scenes.length > 0) {
-//			window.choreo.player.loadGame(gameData.id);
-//			window.choreo.player.loadScene(gameData.scenes[0]);
-//		}
+	//		if (gameData.scenes != null && gameData.scenes.length > 0) {
+	//			window.choreo.player.loadGame(gameData.id);
+	//			window.choreo.player.loadScene(gameData.scenes[0]);
+	//		}
+
+		}
+
+		ChoreoEditor.prototype.buildPlayerForGame = function(gameData) {
+
+			var options = {};
+			options.elementId = 'DefaultPlayer';
+
+			if (window.choreo == null) window.choreo = {};
+			if (window.choreo.players == null) window.choreo.players = {};
+
+			var newPlayer = new ChoreoPlayer(options);
+			newPlayer.apiRoot = window.choreo.apiRoot;
+			newPlayer.fileRoot = window.choreo.fileRoot;
+			newPlayer.gameAssetRoot = window.choreo.gameAssetRoot + gameData.id + "/assets/";
+
+			window.choreo.players[gameData.id] = newPlayer;
+			window.choreo.player = newPlayer;
+
+			// TBD: uniqueName would be a better index, but using the gameId allows for
+			// easier mashups on target pages.
+
+			newPlayer.loadGame(gameData.id);
+
+		};
+
+		ChoreoEditor.prototype.handleFileNew = function(gameData) {
+			console.log("Handling File New.");
+			this.loadGame("EmptyGame");
+		};
+
 
 	}
+	// TBD: is this how we should handle client-side communication?
 
-	window.choreo.editor.buildPlayerForGame = function(gameData) {
-
-		var options = {};
-		options.elementId = 'DefaultPlayer';
-
-		if (window.choreo == null) window.choreo = {};
-		if (window.choreo.players == null) window.choreo.players = {};
-
-		var newPlayer = new ChoreoPlayer(options);
-		newPlayer.apiRoot = window.choreo.apiRoot;
-		newPlayer.fileRoot = window.choreo.fileRoot;
-		newPlayer.gameAssetRoot = window.choreo.gameAssetRoot + gameData.id + "/assets/";
-
-		window.choreo.players[gameData.id] = newPlayer;
-		window.choreo.player = newPlayer;
-
-		// TBD: uniqueName would be a better index, but using the gameId allows for
-		// easier mashups on target pages.
-
-		newPlayer.loadGame(gameData.id);
-
-	};
+	window.choreo.editor = new ChoreoEditor();
 
 	// custom functions
 
@@ -59,11 +92,13 @@
 
 		// TBD: revert to old test: load empty game and then load a test game to show that player can restart itself
 
-		$.getJSON( window.choreo.apiRoot + "games/TestGame", function(data) {
-			if (data != null && data.status != 'error') {
-				window.choreo.editor.loadGame(data);
-			}
-		});
+		window.choreo.editor.loadGame("TestGame");
+
+		// $.getJSON( window.choreo.apiRoot + "games/TestGame", function(data) {
+		// 	if (data != null && data.status != 'error') {
+		// 		window.choreo.editor.loadGame("TestGame");
+		// 	}
+		// });
 
 		// $.ajax({
 		// 	url: "player/TestGame",
@@ -88,6 +123,9 @@
 		// 	});
 		// });
 
+
+		$( ".layers-pane-tabs" ).tabs();
+
 		// menu management
 
 		$('html').click(function() {
@@ -102,7 +140,7 @@
 				if (event.toElement != null) {
 					switch(event.toElement.id) {
 						case "menu_file_new":
-							console.log("NEW");
+							window.choreo.editor.handleFileNew();
 							break;
 						case "menu_file_save":
 							console.log("SAVE");
@@ -174,7 +212,7 @@
 
 	});
 
-})(jQuery);
+//})(jQuery);
 
 // spritesheet generation in Phaser:
 

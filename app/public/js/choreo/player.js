@@ -97,46 +97,8 @@ if (!ChoreoPlayer) {
 		// 	this.element.innerHTML = "<p>Yowsa - " + gameId + ".</p>";
 		// }
 
-// $.when(
-//     $.getScript( this.fileRoot + "sdks/phaser/phaser.min.js"),
-//     $.getScript( this.fileRoot + "sdks/phaser/runtime.js" ),
-//     $.getScript( this.apiRoot + "games/" + gameId + "/classes.js" ),
-//     $.getScript( this.fileRoot + this.apiRoot + "games/" + gameId + "/instances.js" ),
-//     $.getScript( this.fileRoot + this.apiRoot + "games/" + gameId + "/scripts.js"),
-//     $.Deferred(function( deferred ){
-//         $( deferred.resolve );
-//     })
-// ).done(function(){
-
-//     // kick off runtime...
-
-// });
-
-	// loading files indivisually from the client to decouple the player from Node,
-	// in anticipation of possibly having to wrap static HTML in Cordova for mobile
-
-	// collect all js files and eval them in dependency order
-
-		// this._runtimeFiles.push({fileName: this.fileRoot + "sdks/phaser/phaser.min.js", file:""});
-		// this._runtimeFiles.push({fileName: this.fileRoot + "sdks/phaser/runtime.js", file:""});
-
-		// this._runtimeFiles.push({fileName: this.apiRoot + "games/" + gameId + "/classes.js", file:""});
-		// this._runtimeFiles.push({fileName: this.apiRoot + "games/" + gameId + "/instances.js", file:""});
-		// this._runtimeFiles.push({fileName: this.apiRoot + "games/" + gameId + "/scripts.js", file:""});
-
-		// this.loadRuntimeFiles();
-
-		// this.loadJS(this.fileRoot + "sdks/phaser/phaser.js");
-		// this.loadJS(this.fileRoot + "sdks/phaser/runtime.js");
-
-		// // TBD: parse and load relevant game scripts
-		// this.loadJS(this.apiRoot + "games/" + gameId + "/classes.js");
-		// this.loadJS(this.apiRoot + "games/" + gameId + "/instances.js");
-		// this.loadJS(this.apiRoot + "games/" + gameId + "/scripts.js");
-
-		// load the game's scripts in a deliberate orderß
-		// TBD: have the server return one big script for the whole game, with all of the initializations stacked
-		//      correctly.
+		// loading files indivisually from the client to decouple the player from Node,
+		// in anticipation of possibly having to wrap static HTML in Cordova for mobile
 
 		var scriptNames = [];
 
@@ -147,12 +109,15 @@ if (!ChoreoPlayer) {
 		scriptNames.push(this.apiRoot + "games/" + gameId + "/instances.js");
 		scriptNames.push(this.apiRoot + "games/" + gameId + "/scripts.js");
 
+		// TBD: optiomize by dowloading multiple at once
 		this.loadJSSequence(scriptNames);
 
 		return(true);  // game has successfully started download process
 	};
 
 	ChoreoPlayer.prototype.closeGame = function() {
+
+		if (this.runInterval) clearInterval(this.runInterval);
 
 		for (var e in this.entitties) {
 			if (this.entities.hasOwnProperty(e)) this.entitites[e].close();

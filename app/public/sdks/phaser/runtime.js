@@ -40,6 +40,7 @@ if (window.choreo.sdks.Phaser == null) {
 		};
 
 		phaserSDK.prototype.close = function() {
+			console.log("Phaser runtime closing.");
 			this.game.destroy();
 		};
 

@@ -1,11 +1,89 @@
 // Backing code for the Choreo Code Editor web module
 
-(function ($) { // Block scoping, to keep it out of the global namespace
+$ = jQuery;
 
+if (!ChoreoCodeEditor) {
 
-	var programInBlocks = null;
+	var ChoreoCodeEditor = function (options) {
+		options = options || {};
 
-	function constructToolbox(tags) {
+		// this.apiRoot = options.apiRoot || window.choreo.apiRoot || '/';
+		// this.fileRoot = options.fileRoot || window.choreo.fileRoot || '/';
+
+		this.programInBlocks = null;
+		this.blocklyArea = null;
+		this.blocklyDiv = null;
+		this.blocklySVG = null;
+	};
+
+	ChoreoCodeEditor.prototype.init = function() {
+
+		var self = this;
+
+		this.blocklyArea = $('.workspace-pane-content').get(0);
+		this.blocklyDiv = $('.code-editor').get(0);
+
+		var toolbox = this.constructToolboxForEntity(null);
+		this.programInBlocks = Blockly.inject(this.blocklyDiv, {toolbox: toolbox, css: false});
+
+		this.blocklySVG = $('.code-editor > svg').get(0);
+//		blocklySVG.setAttribute('viewBox', "0 0 800 800");
+
+		// resize blockly when our bounds change
+	 	window.addEventListener('resize', function(e) { self.onResize(e); }, false);
+
+		// hack to correct the inexact resizing of the above method
+		setInterval(function() { self.onResize(null); }, 1000);
+
+	 	this.onResize();
+
+	};
+
+	ChoreoCodeEditor.prototype.loadEntityCode = function(e) {
+
+		this.clear();
+
+		var toolbox = this.constructToolboxForEntity(e);
+		this.programInBlocks.updateToolbox(toolbox);
+	}
+
+	ChoreoCodeEditor.prototype.clear = function() {
+		Blockly.mainWorkspace.clear();
+	};
+
+	ChoreoCodeEditor.prototype.onResize = function(e) {
+
+		// Compute the absolute coordinates and dimensions of blocklyArea.
+
+		if (this.blocklyDiv == null || this.blocklyDiv == undefined) {
+			this.blocklyDiv = {};
+		} else {
+			console.log("hello");
+		}
+
+		var element = this.blocklyArea;
+		var x = 0;
+		var y = 0;
+		do {
+			x += element.offsetLeft;
+			y += element.offsetTop;
+			element = element.offsetParent;
+		} while (element);
+
+		// Position blocklyDiv over blocklyArea.
+
+		var offsetWidth = this.blocklyArea.offsetWidth;
+		var offsetHeight = this.blocklyArea.offsetHeight;
+
+		this.blocklyDiv.style.left = x + 'px';
+		this.blocklyDiv.style.top = y + 'px';
+		this.blocklyDiv.style.width = offsetWidth + 'px';
+		this.blocklyDiv.style.height = offsetHeight + 'px';
+		this.blocklySVG.style.width = offsetWidth + 'px';
+		this.blocklySVG.style.height = offsetHeight + 'px';
+ 	};
+
+	ChoreoCodeEditor.prototype.constructToolboxForEntity = function(e) {
 
 		var toolbox = '<xml>';
 		toolbox += '<category name="Control">'
@@ -60,52 +138,18 @@
   		return (toolbox);
 	}
 
+}
+// TBD: is this how we should handle client-side communication?
+
+window.choreo.codeEditor = new ChoreoCodeEditor();
+
+
+//(function ($) {
+
 	$(document).ready(function() {
 
-		var blocklyArea = $('.workspace-pane-content').get(0);
-		var blocklyDiv = $('.code-editor').get(0);
-
-
-		var toolbox = constructToolbox(null);
-		programInBlocks = Blockly.inject(blocklyDiv, {toolbox: toolbox});
-
-		// to update the list of blocks:
-		// programInBlocks.updateToolbox(newTree);
-
-		var blocklySVG = $('.code-editor > svg').get(0);
-
-		var onResize = function(e) {
-
-			// Compute the absolute coordinates and dimensions of blocklyArea.
-
-			var element = blocklyArea;
-			var x = 0;
-			var y = 0;
-			do {
-				x += element.offsetLeft;
-				y += element.offsetTop;
-				element = element.offsetParent;
-			} while (element);
-
-			// Position blocklyDiv over blocklyArea.
-
-			var offsetWidth = blocklyArea.offsetWidth;
-			var offsetHeight = blocklyArea.offsetHeight;
-
-			blocklyDiv.style.left = x + 'px';
-			blocklyDiv.style.top = y + 'px';
-			blocklyDiv.style.width = offsetWidth + 'px';
-			blocklyDiv.style.height = offsetHeight + 'px';
-			blocklySVG.style.width = offsetWidth + 'px';
-			blocklySVG.style.height = offsetHeight + 'px';
-	 	};
-
-	 	window.addEventListener('resize', onResize, false);
-
-	 	// Add an interval, too, since the thing gets janked up sometimes.
-		setInterval(function() { onResize(); }, 1000);
-
-	 	onResize();
+		window.choreo.codeEditor.init();
+		
 	});
 
-})(jQuery);
+//})(jQuery);

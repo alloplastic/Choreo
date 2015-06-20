@@ -90,10 +90,10 @@
 		.flex-flow(column);
 	}
 
-	.layers-pane-content {
+	.layers-pane-tabs {
 		.flex(1, 0, auto);
 	}
-
+	
 	.kit-pane {
 		width: auto;
 		margin-left: @choreo-margin-width;
@@ -172,12 +172,35 @@
 
 }
 
-	.file-menu {
-		position: absolute;
-		top: -1000px;
-	}
+.file-menu {
+	position: absolute;
+	top: -1000px;
+}
 
-	.language-menu {
-		position: absolute;
-		top: -1000px;
-	}
+.language-menu {
+	position: absolute;
+	top: -1000px;
+}
+
+////// jQuery UI overrides ///////
+
+.ui-tabs {
+	padding: 0;
+}
+
+.ui-tabs .ui-tabs-panel {
+	padding: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    padding: 0;
+}
+
+.ui-button-text-only .ui-button-text {
+    padding: .4em .3em;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+	padding: .4em .3em;
+}
+

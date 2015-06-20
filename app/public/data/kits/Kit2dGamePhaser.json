@@ -1,6 +1,0 @@
-{
-	"id": "Kit2dGamePhaser",
-	"name": "2D Game (phaser)",
-	"SDKs": ["phaser"],
-	"entities": ["EPhaserSprite"]
-}

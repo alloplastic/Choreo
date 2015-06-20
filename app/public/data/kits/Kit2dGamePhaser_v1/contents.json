@@ -1,0 +1,11 @@
+{
+	"id": "Kit2dGamePhaser_v1",
+	"name": "Kit2dGamePhaser",
+	"friendlyName": "2D Game (phaser)",
+	"version": "v1",
+	"choreoVersion": 1,
+	"author": "alloplastic_id",
+	"license": "MPL20",
+	"SDKs": ["phaser"],
+	"entities": ["EPhaserSprite"]
+}

@@ -1,10 +1,11 @@
 {
 	"id": "TestGame",
+	"choreoVersion": 1,
 	"name": "Test Game",
 	"firstScene": "SceneOne",
 	"scenes": [{
 		"id": "SceneOne",
-		"kits": ["Kit2dGamePhaser"],
+		"kits": ["Kit2dGamePhaser_v1"],
 		"entities": [{
 			"id": "Logo",
 			"type": "EPhaserSprite",
