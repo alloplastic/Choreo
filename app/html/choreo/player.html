@@ -3,6 +3,7 @@
 
 <script src="/lib/JS-interpreter/acorn_interpreter.js"></script>
 
+<script src="/js/choreo/choreo.js"></script>
 <script src="/js/choreo/player.js"></script>
 
 <script>
@@ -12,7 +13,6 @@
 		var options = {};
 		options.elementId = '{{uniqueName}}';
 
-		if (window.choreo == null) window.choreo = {};
 		if (window.choreo.players == null) window.choreo.players = {};
 		if (window.choreo.jsFilesLoaded == null) window.choreo.jsFilesLoaded = {};
 

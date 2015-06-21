@@ -55,8 +55,8 @@
 			var options = {};
 			options.elementId = 'DefaultPlayer';
 
-			if (window.choreo == null) window.choreo = {};
-			if (window.choreo.players == null) window.choreo.players = {};
+			//if (window.choreo == null) window.choreo = {};
+			//if (window.choreo.players == null) window.choreo.players = {};
 
 			var newPlayer = new ChoreoPlayer(options);
 			newPlayer.apiRoot = window.choreo.apiRoot;

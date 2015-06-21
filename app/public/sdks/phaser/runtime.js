@@ -1,8 +1,8 @@
 
-// TBD: RUNTIME CAN BE A SINGLETON, BUT NEEDS TO RETURN AN INSTANCE TO BE USED BY A GIVEN LAYER
+// Each runtime provides a class that can be instantiated as one of the Layers of a Scene.
 
-window.choreo = window.choreo || {};
-window.choreo.sdks = window.choreo.sdks || {};
+//window.choreo = window.choreo || {};
+//window.choreo.sdks = window.choreo.sdks || {};
 
 if (window.choreo.sdks.Phaser == null) {
 

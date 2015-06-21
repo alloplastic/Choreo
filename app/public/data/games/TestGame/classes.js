@@ -19,44 +19,6 @@
 
 (function() {
 
-	// system classes
-
-	window.choreo.Script = function (code) {
-		this.id = "";
-		this.turbo = false;
-		this.startConditions = [];
-		this.code = code;
-	};
-
-	/**
-	* An live instance of a script being run by an interpreter.
-	*
-	* @param {Script} script - the Choreo Script being run.
-	*/
-	window.choreo.RunningScript = function (script, player) {
-
-		this.script = script;
-		this.player = player;
-
-		// The external API for script code to talk to Choreo
-
-		var choreoPlayer = player;   // think we need the player bound to local scope for the sake of closure; TBD: not sure
-
-		function choreoApi(interpreter, scope) {
-			
-			// Add an API function for the alert() block.
-			var wrapper = function(playerId, entityId, method, args) {
-				entityId = entityId ? entityId.toString() : '';
-				args = args ? args : [];
-				return interpreter.createPrimitive(window.choreo.players[playerId].callMethod(entityId, method, args));
-			};
-			interpreter.setProperty(scope, 'callMethod', interpreter.createNativeFunction(wrapper));
-
-		}
-
-		this.interpreter = new Interpreter(script.code, choreoApi);
-	};
-
 	// game classes
 
 	window.choreo.players['TestGame'].classes = {};
