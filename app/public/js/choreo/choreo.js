@@ -7,8 +7,9 @@ if (!Choreo) {
 		options = options || {};
 
 		// super-simple observer/reaction framework based on pattern=matching of nested JSON paths
-		this.observers = {};
-		this.observerEventQueue = [];
+		this.observations = [];
+		this.observedObjects = [];   // hack to derive an index/id for each observed object
+		this.observationEventQueue = [];
 
 		this.apiRoot = options.apiRoot || '/';
 		this.fileRoot = options.fileRoot || '/';
@@ -42,7 +43,7 @@ if (!Choreo) {
 
 			// allow array indices as part of the path
 			var index = parseInt(prop);
-			if (index != NaN) prop = index;
+			if (!isNaN(index)) prop = index;
 
 			obj= obj[prop];  // TBD: should probably strictly require obj to be an array here
 
@@ -69,7 +70,7 @@ if (!Choreo) {
 
 			// allow array indices as part of the path
 			index = parseInt(prop);
-			if (index != NaN) prop = index;
+			if (!isNaN(index)) prop = index;
 
 			obj = obj[prop];
 
@@ -79,11 +80,11 @@ if (!Choreo) {
 
 		var lastProp = props[i];
 		index = parseInt(lastProp);
-		if (index != NaN) lastProp = index;
+		if (!isNaN(index)) lastProp = index;
 
 		obj[lastProp] = value;   // TBD: should probably strictly require obj to be an array here
 
-		this.queueObserverEvent(obj, propPath, value, "set");
+		this.queueObservationEvent(obj, propPath, value, "set");
 
 		return(true);
 	};
@@ -109,7 +110,7 @@ if (!Choreo) {
 		if (obj && prop && prop.length>0) {
 
 			var index = parseInt(prop);
-			if (index != NaN) {   // integer properties are expected to be array indices
+			if (!isNaN(index)) {   // integer properties are expected to be array indices
 				if (Array.isArray(obj)) {
 					obj.splice(index, 1);
 				} else {
@@ -123,93 +124,112 @@ if (!Choreo) {
 			return false;
 		}
 
-		this.queueObserverEvent(obj, propPath, null, "remove");
+		this.queueObservationEvent(obj, propPath, null, "remove");
 		return true;
 	}
 
-	Choreo.prototype.addObserver = function(obj, propPath, listeningObj) {
+	Choreo.prototype.observe = function(obj, propPath, listeningObj) {
 
-		var observer = this.observers[obj];
+		// unpleasant syntax since in JS objects can't be keys
+		var observation;
 
-		if (observer == null) {
-			observer = {};
-			this.observers[obj] = observer;
+		var o = this.observedObjects.indexOf(obj);
+		if (o < 0) {
+			this.observedObjects.push(obj);   // a way of creating a unique id for each object internally, without decorating
+			o = this.observedObjects.length-1;
+			observation = {};
+			this.observations[o] = observation;
+		} else {
+			observation = this.observations[o];
 		}
-
-		var listeners = observer[propPath];
+		var listeners = observation[propPath];
 
 		if (listeners == null) {
 			listeners = [];
-			observer[propPath] = listeners;
+			observation[propPath] = listeners;
 		}
 
 		if (listeners.indexOf(listeningObj) < 0)
 			listeners.push(listeningObj);
 	};
 
-	Choreo.prototype.removeObserver = function(obj, propPath, listeningObj) {
+	Choreo.prototype.stopObservation = function(obj, propPath, listeningObj) {
 
-		var observer = this.observers[obj];
-		if (observer == null) return;
+		var o = this.observadObjects.indexOf(obj);
+		if (o < 0) return;
 
-		var listeners = observer[propPath];
+		var observation = this.observations[o];
+
+		var listeners = observation[propPath];
 		if (listeners == null) return;
 
 		var i = listeners.indexOf(listeningObj);
 		if (i >= 0) listeners.splice(i, 1);
 	};
 
-	Choreo.prototype.removeAllObservers = function() {
-		this.observers = {};
+	Choreo.prototype.stopAllObservations = function() {
+		this.observations = [];
+		this.observedObjects = [];
 	};
 
-	Choreo.prototype.queueObserverEvent = function(obj, propPath, value, op) {
+	Choreo.prototype.queueObservationEvent = function(obj, propPath, value, op) {
 		// TBD: reject dupes and "parent" value changes when children have already changed
-		this.observerEventQueue.push({object: obj, path: propPath, value: value, operation: op});
+		this.observationEventQueue.push({object: obj, path: propPath, value: value, operation: op});
 	};
 
-	Choreo.prototype.fireObserverEvents = function() {
+	Choreo.prototype.fireObservationEvents = function() {
 
 		// marshall all events for a particular listening object into a single notification
 		var eventsForEachListener = {};
-		var listener;
+		var listener, allListeners =[];
 
 		// TBD: possibly optimize by sorting the property lists and looping through once instead of looking up props
-		for (var e=0, numEvents=this.observerEventQueue.length; e<numEvents; e+=1) {
+		for (var e=0, numEvents=this.observationEventQueue.length; e<numEvents; e+=1) {
 
-			var observerEvent = this.observerEventQueue[e];
+			var observationEvent = this.observationEventQueue[e];
 
-			var observer = this.observers[observerEvent.object];
-			if (observer == null) continue;
+			var observation;
+			var o = this.observedObjects.indexOf(observationEvent.object);
+			if (o < 0) continue;
+			var observation = this.observations[o];
 
-			for (var path in observer) {
-				if (observer.hasOwnProperty(path)) {
-					if (path.indexOf(observerEvent.path) >= 0) {   // match more generic observers, e.g. /schools to /schools/majors
+			for (var path in observation) {
+				if (observation.hasOwnProperty(path)) {
+					if (path.indexOf(observationEvent.path) == 0) {   // match more generic observations, e.g. /schools to /schools/majors
 
-						var listeners = observer[observerEvent.path];
+						var listeners = observation[path];
 						if (listeners == null || listeners.length <= 0) continue;
 
 						for (var i=0, len=listeners.length; i<len; i+=1) {
 							listener = listeners[i];
-							if (eventsForEachListener[listener] == null) eventsForEachListener[listener] = [];
-							eventsForEachListener[listener].push(observerEvent);
+							var l = allListeners.indexOf(listener);
+							if (l<0) {
+								allListeners.push(listener);
+								l = allListeners.length-1;
+							}
+							if (eventsForEachListener[l] == null) eventsForEachListener[l] = [];
+							eventsForEachListener[l].push(observationEvent);
 						}
 					}
 				}
 			}
 		}
 
-		for (listener in eventsForEachListener) {
-			if (eventsForEachListener.hasOwnProperty(listener)) {
-				this.invoke(listener, "onDataChanged", [eventsForEachListener[listener]]);
-			}
+		for (var i=0; i<allListeners.length; i++) {
+			this.invoke(allListeners[i], "onDataChanged", [eventsForEachListener[i]]);			
 		}
 
-		observerEventQueue = [];
+		// for (listener in eventsForEachListener) {
+		// 	if (eventsForEachListener.hasOwnProperty(listener)) {
+		// 		this.invoke(listener, "onDataChanged", [eventsForEachListener[listener]]);
+		// 	}
+		// }
+
+		this.observationEventQueue = [];
 	};
 
 	Choreo.prototype.tick = function() {
-		this.fireObserverEvents();
+		this.fireObservationEvents();
 	};
 
 	// some Choreo system classes

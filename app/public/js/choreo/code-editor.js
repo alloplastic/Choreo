@@ -20,6 +20,9 @@ if (!ChoreoCodeEditor) {
 
 		var self = this;
 
+		// register for notifications about the game data changing
+		_c.observe(_c.editor, "gameData", this);
+
 		this.blocklyArea = $('.workspace-pane-content').get(0);
 		this.blocklyDiv = $('.code-editor').get(0);
 
@@ -38,6 +41,26 @@ if (!ChoreoCodeEditor) {
 	 	this.onResize();
 
 	};
+
+	ChoreoCodeEditor.prototype.onDataChanged = function(changes) {
+
+		var handledReload = false;  // only reload our state once
+
+		// it's up to us how to parse the list of changes in order to take actions.
+
+		for (var i=0; i<changes.length; i++) {
+			var change = changes[i];
+			switch (change.object) {
+				case _c.editor:
+					// if the change was at the top level, do a complete reload
+					if (change.path == "gameData") {
+						// TBD: look up the new current entity
+						this.loadEntityCode(null);
+					}
+				break;
+			}
+		}
+	}
 
 	ChoreoCodeEditor.prototype.loadEntityCode = function(e) {
 

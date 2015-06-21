@@ -13,6 +13,8 @@
 			this.apiRoot = options.apiRoot || window.choreo.apiRoot || '/';
 			this.fileRoot = options.fileRoot || window.choreo.fileRoot || '/';
 
+			this.gameData = {};
+			this.gameState = {};
 		}
 
 		ChoreoEditor.prototype.loadGame = function(id) {
@@ -20,6 +22,7 @@
 			$.getJSON( this.apiRoot + "games/" + id, function(data) {
 				if (data != null && data.status != 'error') {
 					window.choreo.editor.loadGameData(data);
+					_c.set(_c.editor, "gameData", data);
 				}
 			});
 
@@ -35,7 +38,7 @@
 			}
 
 			// TBD: determine first scene and first entity and load them into the UI components
-			window.choreo.codeEditor.loadEntityCode(null);
+			//window.choreo.codeEditor.loadEntityCode(null);
 
 			var self = this;
 			setTimeout(function() {
