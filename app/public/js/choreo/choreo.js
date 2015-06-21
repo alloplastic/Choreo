@@ -6,6 +6,10 @@ if (!Choreo) {
 
 		options = options || {};
 
+		// super-simple observer/reaction framework based on pattern=matching of nested JSON paths
+		this.observers = {};
+		this.observerEventQueue = [];
+
 		this.apiRoot = options.apiRoot || '/';
 		this.fileRoot = options.fileRoot || '/';
 		this.gameAssetRoot = '/';
@@ -14,11 +18,13 @@ if (!Choreo) {
 		this.players = {};
 
 		this.sdks = {};
+
 	};
 
 	// safe calling of functions, as an alternative to actions, events, messages; etc.
-	Choreo.prototype.call = function(obj, func) {
-		if (obj[func]) return obj[func]();
+	Choreo.prototype.invoke = function(obj, funcName, args) {
+		var f = obj[funcName];
+		if (f) return f.apply(obj, args);
 		else return null;
 	};
 
@@ -30,7 +36,7 @@ if (!Choreo) {
 
 		var prop, props = propPath.split('.');
 
-		for (var i=0, iLen=props.length-1; i<iLen; i += 1) {
+		for (var i=0, len=props.length-1; i<len; i+=1) {
 			
 			prop = props[i];
 			var candidate = obj[prop];
@@ -40,6 +46,8 @@ if (!Choreo) {
 				break;
 			}
 		}
+
+		// TBD: if candidate is an array and the final prop is an int, get by index
 		return obj[props[i]];
 	};
 
@@ -51,7 +59,7 @@ if (!Choreo) {
 
 		var prop, props = propPath.split('.');
 
-		for (var i=0, iLen=props.length-1; i<iLen; i += 1) {
+		for (var i=0, len=props.length-1; i<len; i+=1) {
 			
 			prop = props[i];
 			var candidate = obj[prop];
@@ -63,7 +71,101 @@ if (!Choreo) {
 		}
 
 		obj[props[i]] = value;
+
+		this.queueObserverEvent(obj, propPath, value, "set");
+
+		// var self = this;
+		// setTimeout(function () {
+		// 	// Behold, virtual functions in Javascript
+		// 	Choreo.prototype.__proto__.fireObservers(self, obj, propPath, value);
+		// }, 1);   // poor man's event queue
+
+		// TBD: if candidate is an array and the final prop is an int, set by index
+
 		return(true);
+	};
+
+	// remove a property or array item
+	Choreo.prototype.remove = function(obj, propPath, value) {
+
+		// TBD: same logic as set, supporting arrays, except delete
+
+		this.queueObserverEvent(obj, propPath, value, "remove");
+
+	}
+
+	Choreo.prototype.addObserver = function(obj, propPath, listeningObj) {
+
+		var observer = this.observers[obj];
+
+		if (observer == null) {
+			observer = {};
+			this.observers[obj] = observer;
+		}
+
+		var listeners = observer[propPath];
+
+		if (listeners == null) {
+			listeners = [];
+			observer[propPath] = listeners;
+		}
+
+		if (listeners.indexOf(listeningObj) < 0)
+			listeners.push(listeningObj);
+	};
+
+	Choreo.prototype.removeObserver = function(obj, propPath, listeningObj) {
+
+		var observer = this.observers[obj];
+		if (observer == null) return;
+
+		var listeners = observer[propPath];
+		if (listeners == null) return;
+
+		var i = listeners.indexOf(listeningObj);
+		if (i >= 0) listeners.splice(i, 1);
+	};
+
+	Choreo.prototype.removeAllObservers = function() {
+		this.observers = {};
+	};
+
+	Choreo.prototype.queueObserverEvent = function(obj, propPath, value, op) {
+		// TBD: reject dupes and "parent" value changes when children have already changed
+		this.observerEventQueue.push({object: obj, path: propPath, value: value, operation: op});
+	};
+
+	Choreo.prototype.fireObserverEvents = function() {
+
+		// TBD: possibly optimize by sorting the property lists and looping through once instead of looking up props
+		for (var e=0, numEvents=this.observerEventQueue.length; e<numEvents; e+=1) {
+
+			var observerEvent = this.observerEventQueue[e];
+
+			var observer = this.observers[observerEvent.object];
+			if (observer == null) continue;
+
+			for (var path in observer) {
+				if (observer.hasOwnProperty(path)) {
+					if (path.indexOf(observerEvent.path) >= 0) {   // match more generic observers, e.g. /schools to /schools/majors
+
+						var listeners = observer[observerEvent.path];
+						if (listeners == null || listeners.length <= 0) continue;
+
+						for (var i=0, len=listeners.length; i<len; i+=1) {
+							var listener = listeners[i];
+							this.invoke(listener, "onDataChanged", [observerEvent]);
+						}
+					}
+				}
+			}
+		}
+
+		observerEventQueue = [];
+	};
+
+	Choreo.prototype.tick = function() {
+		this.fireObserverEvents();
 	};
 
 	// some Choreo system classes
@@ -111,3 +213,12 @@ if (!Choreo) {
 }
 
 if (!window.choreo) window.choreo = new Choreo();
+
+// TBD: a lot of options here; could at least let calling code set the speed or drive the
+// events synchronously.
+//	var self = this;
+if (!window.choreo.clock) {
+	this.clock = setInterval(function() {
+		window.choreo.__proto__.tick.call(window.choreo);
+	}, 100);
+}
