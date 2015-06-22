@@ -15,7 +15,106 @@
 
 			this.gameData = {};
 			this.gameState = {};
-		}
+
+			// sub-components
+
+			this.scenePane = new ChoreoScenePane();
+			this.codeEditor = new ChoreoCodeEditor();
+		};
+
+		ChoreoEditor.prototype.init = function() {
+
+			// initialize subcomponents
+			this.scenePane.init();
+			this.codeEditor.init();
+
+			// - jQuery kruft -
+
+			// menu management
+
+			$('html').click(function() {
+				//Hide any visible menus if a click propagates up to the body
+				$( ".file-menu").hide();
+				$( ".language-menu").hide();
+			});
+
+			$( ".file-menu").menu({
+				select: function( event, ui ) {
+					$(this).hide();
+					if (event.toElement != null) {
+						switch(event.toElement.id) {
+							case "menu_file_new":
+								window.choreo.editor.handleFileNew();
+								break;
+							case "menu_file_save":
+								console.log("SAVE");
+								break;
+							case "menu_file_load":
+								console.log("LOAD");
+								break;
+							case "menu_file_export_to_desktop":
+								console.log("EXPORT TO DESKTOP");
+								break;
+							case "menu_file_export_to_mobile":
+								console.log("EXPORT TO MOBILE");
+								break;
+						}
+					}
+				}
+			});
+
+			$( ".file-button" )
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+					event.stopPropagation();
+					var menu = $( ".file-menu");
+					menu.position({
+						my: "left top",
+						at: "left bottom",
+						of: ".file-button"
+					});
+					menu.show();
+			});
+
+			$( ".language-menu").menu({
+				select: function( event, ui ) {
+					$(this).hide();
+					if (event.toElement != null) {
+						switch(event.toElement.innerText) {
+							case "English":
+								$.post("/setLanguage/en", {}, function() {
+									window.location.reload();					    	
+								});
+								break;
+							case "Français":
+								$.post("/setLanguage/fr", {}, function() {
+									window.location.reload();					    	
+								});
+								break;
+						}
+					}
+				}
+			});
+
+			$( ".language-button" )
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+					event.stopPropagation();
+					var menu = $( ".language-menu");
+					menu.position({
+						my: "left top",
+						at: "left bottom",
+						of: ".language-button"
+					});
+					menu.show();
+			});
+
+			// load the player dynamically; the player is a fully decoupled component, unaware of its environment
+			window.choreo.editor.loadGame("TestGame");
+
+		};
 
 		ChoreoEditor.prototype.loadGame = function(id) {
 
@@ -26,7 +125,8 @@
 				}
 			});
 
-		}
+		};
+
 		// TBD: really should define an editor class
 		ChoreoEditor.prototype.loadGameData = function(gameData) {
 			
@@ -51,7 +151,7 @@
 	//			window.choreo.player.loadScene(gameData.scenes[0]);
 	//		}
 
-		}
+		};
 
 		ChoreoEditor.prototype.buildPlayerForGame = function(gameData) {
 
@@ -90,129 +190,7 @@
 	// custom functions
 
 	$(document).ready(function() {
-
-		// load the player dynamically; the player is a fully decoupled component, unaware of its environment
-
-		// TBD: revert to old test: load empty game and then load a test game to show that player can restart itself
-
-		window.choreo.editor.loadGame("TestGame");
-
-		// $.getJSON( window.choreo.apiRoot + "games/TestGame", function(data) {
-		// 	if (data != null && data.status != 'error') {
-		// 		window.choreo.editor.loadGame("TestGame");
-		// 	}
-		// });
-
-		// $.ajax({
-		// 	url: "player/TestGame",
-		// 	context: document.body
-		// }).done(function(data) {
-		// 	if (data) {
-		// 		var elems = $(".player-pane-content");
-		// 		if (elems.length > 0) elems[0].innerHTML = data;
-		// 	}	
-		// });
-
-		//$(".player-pane-content").load("player/TestGame");
-
-		// // load the player dynamically; the player is a fully decoupled component, unaware of its environment
-		// $(".player-pane-content").load("player/EmptyGame",
-		// 	function() {
-		// 		// load the data structure for an empty game so that the editor will function immediately
-		// 		$.getJSON( window.choreo.apiRoot + "games/TestGame", function(data) {
-		// 			if (data != null && data.status != 'error') {
-		// 				window.choreo.editor.loadGame(data);
-		// 		}
-		// 	});
-		// });
-
-
-		$( ".layers-pane-tabs" ).tabs();
-
-		// menu management
-
-		$('html').click(function() {
-			//Hide any visible menus if a click propagates up to the body
-			$( ".file-menu").hide();
-			$( ".language-menu").hide();
-		});
-
-		$( ".file-menu").menu({
-			select: function( event, ui ) {
-				$(this).hide();
-				if (event.toElement != null) {
-					switch(event.toElement.id) {
-						case "menu_file_new":
-							window.choreo.editor.handleFileNew();
-							break;
-						case "menu_file_save":
-							console.log("SAVE");
-							break;
-						case "menu_file_load":
-							console.log("LOAD");
-							break;
-						case "menu_file_export_to_desktop":
-							console.log("EXPORT TO DESKTOP");
-							break;
-						case "menu_file_export_to_mobile":
-							console.log("EXPORT TO MOBILE");
-							break;
-					}
-				}
-			}
-		});
-
-		$( ".file-button" )
-		  .button()
-		  .click(function( event ) {
-			event.preventDefault();
-			event.stopPropagation();
-			var menu = $( ".file-menu");
-			menu.position({
-				my: "left top",
-				at: "left bottom",
-				of: ".file-button"
-			});
-			menu.show();
-		  });
-
-		$( ".language-menu").menu({
-			select: function( event, ui ) {
-				$(this).hide();
-				if (event.toElement != null) {
-					switch(event.toElement.innerText) {
-						case "English":
-							$.post("/setLanguage/en", {}, function() {
-								window.location.reload();					    	
-							});
-							break;
-						case "Français":
-							$.post("/setLanguage/fr", {}, function() {
-								window.location.reload();					    	
-							});
-							break;
-					}
-				}
-			}
-		});
-
-		$( ".language-button" )
-		  .button()
-		  .click(function( event ) {
-			event.preventDefault();
-			event.stopPropagation();
-			var menu = $( ".language-menu");
-			menu.position({
-				my: "left top",
-				at: "left bottom",
-				of: ".language-button"
-			});
-			menu.show();
-		  });
-
-		  // on initial load, populate the editor with blank game data
-
-
+		window.choreo.editor.init();
 	});
 
 //})(jQuery);

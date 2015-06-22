@@ -9,6 +9,7 @@ if (!Choreo) {
 		// super-simple observer/reaction framework based on pattern=matching of nested JSON paths
 		this.observations = [];
 		this.observedObjects = [];   // hack to derive an index/id for each observed object
+		this.observationCallbacks = [];
 		this.observationEventQueue = [];
 
 		this.apiRoot = options.apiRoot || '/';
@@ -128,29 +129,50 @@ if (!Choreo) {
 		return true;
 	}
 
-	Choreo.prototype.observe = function(obj, propPath, listeningObj) {
+	Choreo.prototype.observe = function(obj, propPath, listeningObj, funcName) {
 
-		// unpleasant syntax since in JS objects can't be keys
+		if (!funcName) funcName = "onDataChanged";
+
+		// unpleasant syntax since in JS objects can't be keys, made worse by having to keep parallel data structures for things
+		// like callback names.
+
 		var observation;
 
 		var o = this.observedObjects.indexOf(obj);
 		if (o < 0) {
+
 			this.observedObjects.push(obj);   // a way of creating a unique id for each object internally, without decorating
 			o = this.observedObjects.length-1;
 			observation = {};
 			this.observations[o] = observation;
+
+			callbackStruct = {};
+			this.observationCallbacks[o] = callbackStruct;			
+
 		} else {
 			observation = this.observations[o];
+			callbackStruct = this.observationCallbacks[o];
 		}
+
 		var listeners = observation[propPath];
+		var funcNames = callbackStruct[propPath];
 
 		if (listeners == null) {
+
 			listeners = [];
 			observation[propPath] = listeners;
+
+			funcNames = [];
+			callbackStruct[propPath] = funcNames;
 		}
 
-		if (listeners.indexOf(listeningObj) < 0)
+		var l = listeners.indexOf(listeningObj);
+		if (l < 0) {
 			listeners.push(listeningObj);
+			funcNames.push(funcName);
+		} else {
+			funcNames[l] = funcName;
+		}
 	};
 
 	Choreo.prototype.stopObservation = function(obj, propPath, listeningObj) {
@@ -170,6 +192,7 @@ if (!Choreo) {
 	Choreo.prototype.stopAllObservations = function() {
 		this.observations = [];
 		this.observedObjects = [];
+		this.observationCallbacks = [];
 	};
 
 	Choreo.prototype.queueObservationEvent = function(obj, propPath, value, op) {
@@ -188,10 +211,10 @@ if (!Choreo) {
 
 			var observationEvent = this.observationEventQueue[e];
 
-			var observation;
 			var o = this.observedObjects.indexOf(observationEvent.object);
 			if (o < 0) continue;
 			var observation = this.observations[o];
+			var callbackStruct = this.observationCallbacks[o];
 
 			for (var path in observation) {
 				if (observation.hasOwnProperty(path)) {
@@ -200,15 +223,21 @@ if (!Choreo) {
 						var listeners = observation[path];
 						if (listeners == null || listeners.length <= 0) continue;
 
+						var funcNames = callbackStruct[path];
+
 						for (var i=0, len=listeners.length; i<len; i+=1) {
 							listener = listeners[i];
+							funcName = funcNames[i];
 							var l = allListeners.indexOf(listener);
 							if (l<0) {
 								allListeners.push(listener);
 								l = allListeners.length-1;
 							}
-							if (eventsForEachListener[l] == null) eventsForEachListener[l] = [];
-							eventsForEachListener[l].push(observationEvent);
+							if (eventsForEachListener[l] == null) eventsForEachListener[l] = {};
+							if (eventsForEachListener[l][funcName] == null) eventsForEachListener[l][funcName] = [];
+							eventsForEachListener[l][funcName].push(observationEvent);
+							// if (eventsForEachListener[l] == null) eventsForEachListener[l] = [];
+							// eventsForEachListener[l].push([observationEvent, funcName]);
 						}
 					}
 				}
@@ -216,14 +245,10 @@ if (!Choreo) {
 		}
 
 		for (var i=0; i<allListeners.length; i++) {
-			this.invoke(allListeners[i], "onDataChanged", [eventsForEachListener[i]]);			
+			for (funcName in eventsForEachListener[i]) {  // trust we don't need to check for "own property" here
+				this.invoke(allListeners[i], funcName, [eventsForEachListener[i][funcName]]);	
+			}		
 		}
-
-		// for (listener in eventsForEachListener) {
-		// 	if (eventsForEachListener.hasOwnProperty(listener)) {
-		// 		this.invoke(listener, "onDataChanged", [eventsForEachListener[listener]]);
-		// 	}
-		// }
 
 		this.observationEventQueue = [];
 	};

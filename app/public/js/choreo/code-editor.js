@@ -1,6 +1,6 @@
 // Backing code for the Choreo Code Editor web module
 
-$ = jQuery;
+//$ = jQuery;
 
 if (!ChoreoCodeEditor) {
 
@@ -44,6 +44,8 @@ if (!ChoreoCodeEditor) {
 
 	ChoreoCodeEditor.prototype.onDataChanged = function(changes) {
 
+		console.log("Code Editor handle data change");
+		
 		var handledReload = false;  // only reload our state once
 
 		// it's up to us how to parse the list of changes in order to take actions.
@@ -53,7 +55,8 @@ if (!ChoreoCodeEditor) {
 			switch (change.object) {
 				case _c.editor:
 					// if the change was at the top level, do a complete reload
-					if (change.path == "gameData") {
+					if (change.path == "gameData" && !handledReload) {
+						handledReload = true;
 						// TBD: look up the new current entity
 						this.loadEntityCode(null);
 					}
@@ -80,8 +83,6 @@ if (!ChoreoCodeEditor) {
 
 		if (this.blocklyDiv == null || this.blocklyDiv == undefined) {
 			this.blocklyDiv = {};
-		} else {
-			console.log("hello");
 		}
 
 		var element = this.blocklyArea;
@@ -162,17 +163,17 @@ if (!ChoreoCodeEditor) {
 	}
 
 }
-// TBD: is this how we should handle client-side communication?
+// // TBD: is this how we should handle client-side communication?
 
-window.choreo.codeEditor = new ChoreoCodeEditor();
+// window.choreo.codeEditor = new ChoreoCodeEditor();
 
 
-//(function ($) {
+// //(function ($) {
 
-	$(document).ready(function() {
+// 	$(document).ready(function() {
 
-		window.choreo.codeEditor.init();
+// 		window.choreo.codeEditor.init();
 		
-	});
+// 	});
 
 //})(jQuery);
