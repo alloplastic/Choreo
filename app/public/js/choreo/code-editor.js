@@ -20,8 +20,8 @@ if (!ChoreoCodeEditor) {
 
 		var self = this;
 
-		// register for notifications about the game data changing
-		_c.observe(_c.editor, "gameData", this);
+		// register for notifications to any changes in the game data
+		_c.observe(_c.editor, "gameData/@@@", this);
 
 		this.blocklyArea = $('.workspace-pane-content').get(0);
 		this.blocklyDiv = $('.code-editor').get(0);
@@ -45,7 +45,7 @@ if (!ChoreoCodeEditor) {
 	ChoreoCodeEditor.prototype.onDataChanged = function(changes) {
 
 		console.log("Code Editor handle data change");
-		
+
 		var handledReload = false;  // only reload our state once
 
 		// it's up to us how to parse the list of changes in order to take actions.

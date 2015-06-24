@@ -1,5 +1,7 @@
 // A dead simple client-side web "framework," largely tailored to the needs of the Choreo app
 
+// TBD: extract to Straight.js: "the non-framework"
+
 if (!Choreo) {
 
 	var Choreo = function (options) {
@@ -21,6 +23,7 @@ if (!Choreo) {
 
 		this.sdks = {};
 
+		this.delim = '/';   //aligns with REST syntax and doesn't conflict with regex (unlike '.')
 	};
 
 	// safe calling of functions, as an alternative to actions, events, messages; etc.
@@ -36,7 +39,7 @@ if (!Choreo) {
 		if (!propPath)
 			return obj;
 
-		var prop, props = propPath.split('.');
+		var prop, props = propPath.split(this.delim);
 
 		for (var i=0, len=props.length; i<len; i+=1) {
 
@@ -63,7 +66,7 @@ if (!Choreo) {
 		if (!propPath)
 			return false;
 
-		var prop, props = propPath.split('.');
+		var prop, props = propPath.split(this.delim);
 
 		for (var i=0, len=props.length-1; i<len; i+=1) {
 			
@@ -132,6 +135,24 @@ if (!Choreo) {
 	Choreo.prototype.observe = function(obj, propPath, listeningObj, funcName) {
 
 		if (!funcName) funcName = "onDataChanged";
+
+		// parse a few basic wildcards out of propPath to create a regular expression for pattern-matching;
+		// use non-regex wildcards so that regex directives can be passesd in as well
+
+		// "@@@" at end allows for matching against all child/leaf data changes
+		if (propPath.indexOf('@@@', propPath.length - 3) == -1) {
+			// if *** not present, anchor the match string to the end
+			propPath = '^' + propPath + '$';
+		} else {
+			// to match any suffix, just delete the '***' and don't anchor the regex at the end
+			propPath = '^' + propPath.substring(0, propPath.length-4);
+		}
+
+		// replace '@' characters with regex for matching everything between the delimiters ('/')
+		propPath = propPath.replace(/@/g, '/[^\/]*/'); 
+
+		// replace '#' characters with regex for matching any single character between the delimiters ('/')
+		propPath = propPath.replace(/#/g, '/[^\/]/'); 
 
 		// unpleasant syntax since in JS objects can't be keys, made worse by having to keep parallel data structures for things
 		// like callback names.
@@ -202,11 +223,13 @@ if (!Choreo) {
 
 	Choreo.prototype.fireObservationEvents = function() {
 
-		// marshall all events for a particular listening object into a single notification
+		// marshall all events for a particular listener-path combination into a single notification
+
 		var eventsForEachListener = {};
 		var listener, allListeners =[];
 
 		// TBD: possibly optimize by sorting the property lists and looping through once instead of looking up props
+
 		for (var e=0, numEvents=this.observationEventQueue.length; e<numEvents; e+=1) {
 
 			var observationEvent = this.observationEventQueue[e];
@@ -218,7 +241,30 @@ if (!Choreo) {
 
 			for (var path in observation) {
 				if (observation.hasOwnProperty(path)) {
-					if (path.indexOf(observationEvent.path) == 0) {   // match more generic observations, e.g. /schools to /schools/majors
+
+					// need to match two conditions: (1) the regex definiing the exact piece of data to watch and whether
+					// to watch children of this data field and (2) a wholesale change to a parent data field.
+
+					// if the straight observer pattern doesn't match, check to see if the change is happening to a parent
+					// of us.
+
+					var match=false;
+					if (!observationEvent.path.match(path)) {
+
+						var numDelimsInPath = (observationEvent.path.match(/\//g) || []).length;   // TBD: hard-wired to delim = '/'
+						var numDelimsInObservationPath = (path.match(/\//g) || []).length;
+
+						if (numDelimsInObservationPath > numDelimsInPath) {
+							var tokens = path.split(this.delim).slice(0, numDelimsInPath+1);
+							var subPath = tokens.join(this.delim);
+							match = observationEvent.path.match(subPath); 
+						}
+
+					} else {
+						match = true;
+					}
+
+					if (match) {
 
 						var listeners = observation[path];
 						if (listeners == null || listeners.length <= 0) continue;
@@ -236,8 +282,6 @@ if (!Choreo) {
 							if (eventsForEachListener[l] == null) eventsForEachListener[l] = {};
 							if (eventsForEachListener[l][funcName] == null) eventsForEachListener[l][funcName] = [];
 							eventsForEachListener[l][funcName].push(observationEvent);
-							// if (eventsForEachListener[l] == null) eventsForEachListener[l] = [];
-							// eventsForEachListener[l].push([observationEvent, funcName]);
 						}
 					}
 				}

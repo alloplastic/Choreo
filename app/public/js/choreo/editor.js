@@ -111,6 +111,37 @@
 					menu.show();
 			});
 
+			// some jQuery helpers
+
+			$.fn.inlineEdit = function(replaceWith, connectWith) {
+
+				$(this).hover(function() {
+					$(this).addClass('hover');
+				}, function() {
+					$(this).removeClass('hover');
+				});
+
+				$(this).dblclick(function() {
+
+					var elem = $(this);
+
+					elem.hide();
+					elem.after(replaceWith);
+					replaceWith.focus();
+
+					replaceWith.blur(function() {
+
+						if ($(this).val() != "") {
+							connectWith.val($(this).val()).change();
+							elem.text($(this).val());
+						}
+
+						$(this).remove();
+						elem.show();
+					});
+				});
+			};
+
 			// load the player dynamically; the player is a fully decoupled component, unaware of its environment
 			window.choreo.editor.loadGame("TestGame");
 
