@@ -2,10 +2,10 @@
 
 (function() {
 
-	var Script = window.choreo.Script;
+	var Script = _c.Script;
 
-	var player = window.choreo.players['TestGame'];
-	var classes = window.choreo.players['TestGame'].classes;
+	var player = _c.players['TestGame'];
+	var classes = _c.players['TestGame'].classes;
 
 	var scene, script;
 

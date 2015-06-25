@@ -4,9 +4,9 @@
 //window.choreo = window.choreo || {};
 //window.choreo.sdks = window.choreo.sdks || {};
 
-if (window.choreo.sdks.Phaser == null) {
+if (_c.sdks.Phaser == null) {
 
-	window.choreo.sdks.Phaser = function(element, player) {
+	_c.sdks.Phaser = function(element, player) {
 		this.element = element;
 		this.game = null;
 		this.loader = null;
@@ -16,7 +16,7 @@ if (window.choreo.sdks.Phaser == null) {
 
 	(function() {
 
-		var phaserSDK = window.choreo.sdks.Phaser;
+		var phaserSDK = _c.sdks.Phaser;
 
 		phaserSDK.prototype.init = function() {
 

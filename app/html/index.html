@@ -7,14 +7,15 @@
 	<head>
 		{{> head }}
 		<meta name="format-detection" content="telephone=no">
+		<script src="/lib/straight/straight.js"></script>
 		<script src="/js/choreo/choreo.js"></script>
 	</head>
 
 	<script>
 		//window.choreo = window.choreo || {};
-		window.choreo.apiRoot = '{{apiRoot}}';
-		window.choreo.fileRoot = '{{fileRoot}}';
-		window.choreo.gameAssetRoot = '{{gameAssetRoot}}';
+		window._c.apiRoot = '{{apiRoot}}';
+		window._c.fileRoot = '{{fileRoot}}';
+		window._c.gameAssetRoot = '{{gameAssetRoot}}';
 	</script>
 
 	<script src="/js/site/home.js"></script>

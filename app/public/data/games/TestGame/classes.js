@@ -2,16 +2,16 @@
 
 // classes.js will be exported as part of a game save-game, with the name of the game embedded at that time
 
-//window.choreo = window.choreo || {};
-//window.choreo.players['TestGame'].assetStore = {loaded: false};
-//window.choreo.players['TestGame'].assetBaseUrl = "/data/games/TestGame/assets/";
+//window._c = window._c || {};
+//window._c.players['TestGame'].assetStore = {loaded: false};
+//window._c.players['TestGame'].assetBaseUrl = "/data/games/TestGame/assets/";
 
 // Choreo system classes
-//window.choreo.classes = {};
+//window._c.classes = {};
 
 (function() {
 
-	var classes = window.choreo.classes;
+	var classes = _c.classes;
 
 	// classes not needed due to player.contents?
 
@@ -21,8 +21,8 @@
 
 	// game classes
 
-	window.choreo.players['TestGame'].classes = {};
-	var player = window.choreo.players['TestGame'];
+	_c.players['TestGame'].classes = {};
+	var player = _c.players['TestGame'];
 	var classes = player.classes;
 
 	// This will come out of a partial, with the var being a model param

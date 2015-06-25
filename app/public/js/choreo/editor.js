@@ -10,8 +10,8 @@
 		var ChoreoEditor = function (options) {
 			options = options || {};
 
-			this.apiRoot = options.apiRoot || window.choreo.apiRoot || '/';
-			this.fileRoot = options.fileRoot || window.choreo.fileRoot || '/';
+			this.apiRoot = options.apiRoot || _c.apiRoot || '/';
+			this.fileRoot = options.fileRoot || _c.fileRoot || '/';
 
 			this.gameData = {};
 			this.gameState = {};
@@ -44,7 +44,7 @@
 					if (event.toElement != null) {
 						switch(event.toElement.id) {
 							case "menu_file_new":
-								window.choreo.editor.handleFileNew();
+								_c.editor.handleFileNew();
 								break;
 							case "menu_file_save":
 								console.log("SAVE");
@@ -143,7 +143,7 @@
 			};
 
 			// load the player dynamically; the player is a fully decoupled component, unaware of its environment
-			window.choreo.editor.loadGame("TestGame");
+			_c.editor.loadGame("TestGame");
 
 		};
 
@@ -151,7 +151,7 @@
 
 			$.getJSON( this.apiRoot + "games/" + id, function(data) {
 				if (data != null && data.status != 'error') {
-					window.choreo.editor.loadGameData(data);
+					_c.editor.loadGameData(data);
 					_c.set(_c.editor, "gameData", data);
 				}
 			});
@@ -164,8 +164,8 @@
 			// We don't completely destroy old players since they are pretty lightweight and since
 			// their SDK downloads can serve as a cache for other players.
 
-			if (window.choreo.player) {
-				window.choreo.player.closeGame();
+			if (_c.player) {
+				_c.player.closeGame();
 			}
 
 			// TBD: determine first scene and first entity and load them into the UI components
@@ -193,12 +193,12 @@
 			//if (window.choreo.players == null) window.choreo.players = {};
 
 			var newPlayer = new ChoreoPlayer(options);
-			newPlayer.apiRoot = window.choreo.apiRoot;
-			newPlayer.fileRoot = window.choreo.fileRoot;
-			newPlayer.gameAssetRoot = window.choreo.gameAssetRoot + gameData.id + "/assets/";
+			newPlayer.apiRoot = _c.apiRoot;
+			newPlayer.fileRoot = _c.fileRoot;
+			newPlayer.gameAssetRoot = _c.gameAssetRoot + gameData.id + "/assets/";
 
-			window.choreo.players[gameData.id] = newPlayer;
-			window.choreo.player = newPlayer;
+			_c.players[gameData.id] = newPlayer;
+			_c.player = newPlayer;
 
 			// TBD: uniqueName would be a better index, but using the gameId allows for
 			// easier mashups on target pages.
@@ -216,12 +216,12 @@
 	}
 	// TBD: is this how we should handle client-side communication?
 
-	window.choreo.editor = new ChoreoEditor();
+	_c.editor = new ChoreoEditor();
 
 	// custom functions
 
 	$(document).ready(function() {
-		window.choreo.editor.init();
+		_c.editor.init();
 	});
 
 //})(jQuery);

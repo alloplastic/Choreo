@@ -5,8 +5,8 @@
 
 (function() {
 
-	var player = window.choreo.players['TestGame'];
-	var classes = window.choreo.players['TestGame'].classes;
+	var player = _c.players['TestGame'];
+	var classes = _c.players['TestGame'].classes;
 
 	// Relevant aspects of the game structure are compiled into code here
 
@@ -17,7 +17,7 @@
 
 	// each layer in the game instantiates its own instance of an SDK runtime
 	player.scenes['SceneOne'].layers = [];
-	player.scenes['SceneOne'].layers[0] = new window.choreo.sdks.Phaser(player.elementId, player);
+	player.scenes['SceneOne'].layers[0] = new _c.sdks.Phaser(player.elementId, player);
 	player.scenes['SceneOne'].layers[0].init();
 
 	player.entities = {};

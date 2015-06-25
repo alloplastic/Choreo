@@ -36,6 +36,8 @@ if (!ChoreoPlayer) {
 		this.fileRoot = '/';
 		this.gameAssetRoot = '/';
 
+		// hack to determine the line number of an error in an evaled script; (didn't work in most browsers)
+		//this.lastEvalLine = 0;
 
 		// for the lifetime of the player, we load js files only once; assumption is that every
 		// file is retrieved via a unique RESTful path.
@@ -204,14 +206,14 @@ if (!ChoreoPlayer) {
 
 		if (!this.loadScene(this.currentScene)) return;
 
-		var RunningScript = window.choreo.RunningScript;
+		//var RunningScript = _c.RunningScript;
 
 //		var scripts = scene.scripts;
 
 		// TBD: identify "start" scripts and load only those into the running-scripts list
 		var scene = this._curSceneRef;
 		for (var i=0; i<scene.scripts.length; i++) {
-			this.runningScripts.push(new RunningScript(scene.scripts[i]));
+			this.runningScripts.push(new _c.RunningScript(scene.scripts[i]));
 		}
 
 		// start run loop
@@ -300,13 +302,13 @@ if (!ChoreoPlayer) {
 		if (!fileNames || fileNames.length <= 0) return;
 
 		var nextFileIndex = 0;
-		while (window.choreo.jsFilesLoaded[fileNames[nextFileIndex]]) {
+		while (_c.jsFilesLoaded[fileNames[nextFileIndex]]) {
 			nextFileIndex++;
 			if (nextFileIndex == fileNames.length) return;
 		}
 
 		var nextFileName = fileNames[nextFileIndex];
-		window.choreo.jsFilesLoaded[nextFileName] = true;  // TBD: deal with service failure
+		_c.jsFilesLoaded[nextFileName] = true;  // TBD: deal with service failure
 
 		// using plain JS to avoid jQuery dependency in player
 
@@ -325,7 +327,8 @@ if (!ChoreoPlayer) {
 						//window.choreo.players[self.gameId].globalEval(req.responseText);
 						self.globalEval(req.responseText);
 					} catch(e) {
-						alert('Choreo: failed to load library: ' + nextFileName + "\n\nERROR: " + e.message);
+						alert('Choreo: failed to load library: ' + nextFileName + '\n\nERROR: '  +  e.message + '\n\n' + e.stack);
+//						alert('Choreo: failed to load library: ' + nextFileName + '\n\nERROR: ' + (e.lineNumber - this.lastEvalLine) + ': '  +  e.message + '\n\n' + e.stack);
 					}
 					fileNames.splice(0, nextFileIndex+1);
 					self.loadJSSequence(fileNames);					
@@ -338,10 +341,16 @@ if (!ChoreoPlayer) {
 
 	ChoreoPlayer.prototype.globalEval = function(src) {
 		if (window.execScript) {
+			// wasn't supported in Chrome
+//			this.lastEvalLine = new Error().lineNumber + 1;
+//			if (!Number.isInteger(this.lastEvalLine)) this.lastEvalLine = 0;
 			window.execScript(src);
 			return;
 		}
+		var self = this;
 		var fn = function() {
+//			self.lastEvalLine = new Error().lineNumber + 1;
+//			if (!Number.isInteger(self.lastEvalLine)) self.lastEvalLine = 0;
 			window.eval.call(window, src);
 		};
 		fn();
