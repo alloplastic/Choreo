@@ -27,6 +27,8 @@ if (!ChoreoScenePane) {
 		// for now, just rebuild everything.  TBD: catch low-level changes like scene names for quick transitions
 		console.log("Rebuild Scenes Pane.");
 
+		var i, a;
+
 		var $tabTemplate = $(".tab-template.template");
 		var $tabContentTemplate = $(".tab-content-template.template");
 
@@ -41,27 +43,28 @@ if (!ChoreoScenePane) {
 
 		if (numScenes < $tabs.length-1) {
 			$tabs.slice(numScenes, $tabs.length - numScenes -1).remove();
-			for (var i = $tabs.length; i<numScenes; i++) {
-			}			
 		} else if (numScenes > $tabs.length-1) {
-			for (var i = $tabs.length-1; i>=numScenes; i--) {
+			for (i = $tabs.length-1; i>=numScenes; i--) {
 
 				var newTab = $tabTemplate.clone().removeClass('template');
-				var a = newTab.find('a');
+				a = newTab.find('a');
 				a.attr('href', '#layers-pane-tab-' + i);
 				a.text('-' + i + '-');
 				$tabs.eq(i).before(newTab);
 			}
 		}
 
-		// for each tab...
+		// for each tab, rebuild the content.  The layer lists are not that big.
+		$(".layers-pane-tabs > div").remove();
+		var $tabsContainer = $('.layers-pane-tabs');
 
-		var tab = $tabTemplate.clone().removeClass('template');
-		var tabContent = $tabContentTemplate.clone().removeClass('template');
-
-		// tab.find(...).html();
-		// tab.attr(...);
-
+		for (i=0; i<numScenes; i++) {
+			var newTabContent = $tabContentTemplate.clone().removeClass('template');
+			newTabContent.attr('id', '#layers-pane-tab-' + i);
+			a = newTabContent.find('a');
+			a.text('This is where Layer ' + i + ' stuff goes.');
+			$tabsContainer.append(newTabContent);
+		}
 
 	};
 

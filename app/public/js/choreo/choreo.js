@@ -56,7 +56,22 @@ if (_c === undefined || _c === null) {
 			}
 
 			this.interpreter = new Interpreter(script.code, choreoApi);
-		}
+		},
+
+		/**
+		* Abstract base class for the required compiler of each "kit."  The compiuler must be able to transform a 
+		* collection of visual blocks into code files to be loaded into the player dynamically.
+		*/
+		Compiler: function () {
+
+			// probably really bad style, but oh well...
+			this.__proro__ = {
+
+				codeFromBlockly: function(ßblockly) {}
+			}
+
+		},
+
 	};
 
 	var _c = new _Choreo();
