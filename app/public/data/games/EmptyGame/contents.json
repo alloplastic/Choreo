@@ -2,6 +2,11 @@
 	"id": "",
 	"choreoVersion": 1,
 	"name": "New Game",
-	"firstScene": "ooga",
-	"scenes": []
+	"firstScene": "Scene0",
+	"scenes": [{
+		"id": "Scene0",
+		"name": "- 1 -",
+		"kits": [],
+		"entities": []
+	}]
 }

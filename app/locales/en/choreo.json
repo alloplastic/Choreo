@@ -20,5 +20,7 @@
 	"Load": "Load",
 	"Export to Desktop": "Export to Desktop",
 	"Export to Mobile": "Export to Mobile",
-	"One": "One"
+	"One": "One",
+	"- 0 -": "- 0 -",
+	"- 1 -": "- 1 -"
 }

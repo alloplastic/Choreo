@@ -72,6 +72,18 @@ if (_c === undefined || _c === null) {
 
 		},
 
+		// until we create defined models, at least have a central place where JSON blobs are created
+		newSceneData: function() {
+
+			var newScene = 	{
+				"id": "One",
+				"kits": [],
+				"entities": []
+			};
+			return(newScene);
+
+		}
+
 	};
 
 	var _c = new _Choreo();

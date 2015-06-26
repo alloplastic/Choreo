@@ -5,6 +5,7 @@
 	"firstScene": "SceneOne",
 	"scenes": [{
 		"id": "SceneOne",
+		"name": "One",
 		"kits": ["Kit2dGamePhaser_v1"],
 		"entities": [{
 			"id": "Logo",

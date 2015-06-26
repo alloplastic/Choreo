@@ -112,7 +112,7 @@
 		get: function(obj, propPath) {
 
 			if (!propPath)
-				return obj;
+				return null;
 
 			var prop, props = propPath.split(this.delim);
 
@@ -134,7 +134,7 @@
 		},
 
 		// safe, nested access to data, in lieu of automatic data binding
-		set: function(obj, propPath, value) {
+		set: function(rootObj, propPath, value) {
 
 			var index;
 
@@ -142,6 +142,7 @@
 				return false;
 
 			var prop, props = propPath.split(this.delim);
+			var obj = rootObj;
 
 			for (var i=0, len=props.length-1; i<len; i+=1) {
 				
@@ -163,7 +164,7 @@
 
 			obj[lastProp] = value;   // TBD: should probably strictly require obj to be an array here
 
-			this.queueObservationEvent(obj, propPath, value, "set");
+			this.queueObservationEvent(rootObj, propPath, value, "set");
 
 			return(true);
 		},
