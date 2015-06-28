@@ -126,7 +126,7 @@
 
 				obj= obj[prop];  // TBD: should probably strictly require obj to be an array here
 
-				if (obj == undefined)
+				if (!obj)
 					break;
 			}
 
@@ -154,7 +154,7 @@
 
 				obj = obj[prop];
 
-				if (obj == undefined)
+				if (!obj)
 					return false;
 			}
 

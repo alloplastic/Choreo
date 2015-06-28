@@ -43,6 +43,7 @@ if (!ChoreoScenePane) {
 
 		// register for notifications about the game data changing
 		_c.observe(_c.editor, "gameData/scenes", this, "onSceneDataChanged");		
+		_c.observe(_c.editor.uiState, "data", this, "onUIDataChanged");		
 	};
 
 	ChoreoScenePane.prototype.onSceneDataChanged = function(changes) {
@@ -55,10 +56,12 @@ if (!ChoreoScenePane) {
 		// for now, just rebuild everything.  TBD: catch low-level changes like scene names for quick transitions
 		console.log("Rebuild Scenes Pane.");
 
+		var self = this;
 		var i, a, div;
 
 		var $tabTemplate = $(".tab-template.template");
 		var $tabContentTemplate = $(".tab-content-template.template");
+		var $layerItemTemplate = $(".layer-item-template.template");
 
 		//var $tabParent = $(".layers-pane-tabs > ul");
 		var $tabs = $(".layers-pane-tabs > ul > li");
@@ -74,28 +77,64 @@ if (!ChoreoScenePane) {
 			return;
 		}
 
+		// adjust the number of tabs to match the number of scenes
+
 		if (numScenes < $tabs.length-1) {
+
 			$tabs.slice(numScenes, $tabs.length - numScenes).remove();
+
 		} else if (numScenes > $tabs.length-1) {
+
 			for (i = numScenes; i>=$tabs.length-1; i--) {
+
 				var newTab = $tabTemplate.clone().removeClass('template');
 				a = newTab.find('a');
 				a.attr('href', '#layers-pane-tab-' + i);
 				a.text('-' + i + '-');
+
 				$tabs.eq(i).before(newTab);
 			}
-			//this.tabs.tabs("option", "active", 0);			
 		}
 
 		// for each tab, rebuild the content.  The layer lists are not that big.
 		$(".layers-pane-tabs > div").remove();
 		var $tabsContainer = $('.layers-pane-tabs');
 
-		for (i=0; i<numScenes+1; i++) {
+		for (i=0; i<numScenes; i++) {
 			var newTabContent = $tabContentTemplate.clone().removeClass('template');
 			newTabContent.attr('id', 'layers-pane-tab-' + i);
-			div = newTabContent.find('div');
-			div.text('This is where Layer ' + i + ' stuff goes.');
+
+			// loop through the scene's layers/kits and display them in a list
+			var kits = scenes[i].kits;
+			if (kits && kits.length>0) {
+				for (var j=0; j<kits.length; j++) {
+
+					var newLayerItem = $layerItemTemplate.clone().removeClass('template');
+
+					a = newLayerItem.find('a');
+					a.click(j, function (e) {
+						console.log('setting current layer to ' + e.data);
+						_c.set(_c.editor.uiState, 'data/currentLayer', e.data);
+					});
+
+					newTabContent.append(newLayerItem);
+					//newLayerItem.attr('id', 'layers-pane-tab-' + i);
+				}
+			}
+			// add the button for creating a new layer
+			var finalLayerItem = $layerItemTemplate.clone().removeClass('template');
+
+			a = finalLayerItem.find('a');
+			a.click(function () {
+				console.log("user added a layer; kick off mega-menu to select type.");
+			});
+
+			newTabContent.append(finalLayerItem);
+
+			// highlight the selected layer
+
+			//div = newTabContent.find('div');
+			//div.text('This is where Layer ' + i + ' stuff goes.');
 			$tabsContainer.append(newTabContent);
 		}
 
@@ -122,6 +161,32 @@ if (!ChoreoScenePane) {
 		this.tabs.tabs("option", "active", numScenes-1);
 
 
+	};
+
+	ChoreoScenePane.prototype.onUIDataChanged = function(changes) {
+
+		if (!this.tabs) {
+			console.log('scene-panel: UI data changed before tabs UI initialized.');
+			return;
+		}
+
+		// for now, just rebuild everything.  TBD: catch low-level changes like scene names for quick transitions
+		console.log("UI changes to Scenes Pane.");
+
+		//var i, a, div;
+
+		//var $tabParent = $(".layers-pane-tabs > ul");
+		var $tabs = $(".layers-pane-tabs > ul > li");
+
+		// clear any 'selected' highlight state
+		$a = $(".layers-pane-tabs > ul > li > a");
+		for (i=0; i<$a.length-1; i++) {
+			$a[i].removeClass('item-selected');
+		}
+
+		if (_c.editor.uiState.currentLayer >= 0) {
+			$a[_c.editor.uiState.currentLayer].addClass('item-selected')
+		}
 	};
 
 }

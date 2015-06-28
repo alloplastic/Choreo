@@ -14,7 +14,7 @@
 			this.fileRoot = options.fileRoot || _c.fileRoot || '/';
 
 			this.gameData = {};
-			this.gameState = {};
+			this.uiState = new ChoreoEditorModel();
 
 			// sub-components
 
@@ -142,24 +142,42 @@
 				});
 			};
 
-			// load the player dynamically; the player is a fully decoupled component, unaware of its environment
 			_c.editor.loadGame("TestGame");
 
 		};
 
-		ChoreoEditor.prototype.loadGame = function(id) {
+		/*
+		 * Initializes the data model for the editor, which essentially defines what aspect of the loaded game is currently
+		 * being rendered and edited.
+		 * @method
+		 */
 
-			$.getJSON( this.apiRoot + "games/" + id, function(data) {
-				if (data != null && data.status != 'error') {
-					_c.editor.loadGameData(data);
-					_c.set(_c.editor, "gameData", data);
-				}
-			});
+		ChoreoEditor.prototype.initEditorState = function(gameData) {
 
+			if (gameData != null) {
+				this.uiState.defaultsForGame(gameData);
+			}
 		};
 
-		// TBD: really should define an editor class
-		ChoreoEditor.prototype.loadGameData = function(gameData) {
+		ChoreoEditor.prototype.loadGame = function(id) {
+
+			var self = this;
+			$.getJSON( this.apiRoot + "games/" + id, function(data) {
+				if (data != null && data.status != 'error') {
+
+					// Though observers won't be propagated until after all JS in a given timestep finishes, we still
+					// need to be particular about the order of operations when updating the data, since we also want some
+					// code to respond to minor changes to UI state later.  So, the most logical sequence of actions is
+					// (1) tear down the old player and get a new one loading the new data, (2) replace the editor's
+					// gameData, triggering UI refreshes, and (3) recalculate the UI state now that we have new data.
+					_c.set(self, "gameData", data);
+					self.runGame(data);  // launch a player with the new data
+					self.initEditorState(data);  // recalculate this.uiState
+				}
+			});
+		};
+
+		ChoreoEditor.prototype.runGame = function(gameData) {
 			
 			// We don't completely destroy old players since they are pretty lightweight and since
 			// their SDK downloads can serve as a cache for other players.
@@ -168,13 +186,15 @@
 				_c.player.closeGame();
 			}
 
+			// individual ui components "observe" the game data and adjust their state accor
 			// TBD: determine first scene and first entity and load them into the UI components
 			//window.choreo.codeEditor.loadEntityCode(null);
 
 			var self = this;
 			setTimeout(function() {
+				// load the player dynamically; the player is a fully decoupled component, unaware of its environment
 				self.buildPlayerForGame(gameData);
-			}, 2000);
+			}, 200);
 
 
 	//		if (gameData.scenes != null && gameData.scenes.length > 0) {

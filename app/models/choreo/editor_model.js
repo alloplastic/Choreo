@@ -1,9 +1,12 @@
 /**
- * EditorModel - toplevel state of the editor layout
- * 
+ * EditorModel - toplevel state of the editor layout.
+ *
+ * Since the models in this folder are mostly intended for server-side code, this one is not used
+ * becuase the client manages the UI state dynamically with another model (/public/js/choreo/editor_model.js).
  */
 
-var EditorModel = function EditorModelConstructor(state) {
+var EditorModel = function EditorModelConstructor() {
+
 	// not needed since these are set in home.js
 	// this.apiRoot = "/";
 	// this.fileRoot = "/";

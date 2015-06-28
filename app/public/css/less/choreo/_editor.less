@@ -4,9 +4,6 @@
 
 // vars
 
-	@choreo-margin-width: .3em;
-	@choreo-menu-bar-height: 3.6em;
-
 //	height: 100%;
 
 	& {
@@ -170,6 +167,53 @@
 		.flex(1, 1, auto);
 	}
 
+	.layer-item-template {
+
+		width: 100%;
+
+		a {
+			display: block;
+			position: relative;
+			width: 100%;
+			height: 1.8em;
+			margin: .2em 0 0 0;
+			background-color: @choreo-item-color-default;
+			border: 1px solid @choreo-item-color-default;
+			cursor: pointer;
+			font-size: @choreo-font-size-normal;
+
+			&:hover {
+				border: 1px solid #ff0000;
+				}
+
+			img {
+				width: 1.2em;
+				height: 1.2em;
+				margin: .3em .8em .3em .3em;
+			}
+
+			span {
+				position: absolute;
+				top: 50%;
+				height: 1.8em;
+				line-height: 1.8em;
+				margin-top: -.9em;
+				padding: 0;
+
+				// display: relative;
+				// top: 0em;
+				//vertical-align: middle;
+			//	line-height: 1.8em;
+				// padding: 0em 0em .4em 0em;
+			}
+		}
+	}
+
+	.item-selected {
+		background-color: @choreo-item-color-selected;
+	}
+
+
 }
 
 .file-menu {
@@ -181,36 +225,3 @@
 	position: absolute;
 	top: -1000px;
 }
-
-////// jQuery UI overrides ///////
-
-.ui-tabs {
-	padding: 0;
-}
-
-.ui-tabs .ui-tabs-panel {
-	padding: 0;
-}
-
-.ui-dialog .ui-dialog-content {
-    padding: 0;
-}
-
-.ui-button-text-only .ui-button-text {
-    padding: .4em .3em;
-}
-
-.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
-	padding: .4em .3em;
-}
-
-// .ui-tabs-nav li {
-// 	margin-top: 0.6em;
-// 	font-size: 80%;
-// }
-
-// .ui-tabs-nav li.ui-tabs-selected,
-// .ui-tabs-nav li.ui-state-active {
-// 	margin-top: 0em;
-// 	font-size: 100%;
-// }
