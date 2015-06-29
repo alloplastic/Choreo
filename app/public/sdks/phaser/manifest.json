@@ -1,0 +1,6 @@
+{
+	"id": "PhaserSDK",
+	"name": "Phaser Game Engine",
+	"devFiles": ["lib/phaser/phaser.js"],
+	"prodFiles": ["lib/phaser/phaser.min.js"]
+}

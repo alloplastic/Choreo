@@ -3,7 +3,11 @@ var express = require('express')
 ,	util = require('util')
 ,	viewLocale = require('../extensions/view-locale')
 ,	crypto = require('crypto')
-,	i18n = require('../extensions/i18n-namespace');
+,	i18n = require('../extensions/i18n-namespace'),
+	oembed = require('connect-oembed');
+//	http = require('http');
+
+//http.globalAgent.maxSockets = 10;
 
 module.exports = function() {
 	var FAVICON_FULL_PATH = '/../../app/public/favicon.ico';
@@ -19,13 +23,16 @@ module.exports = function() {
 		console.warn(util.format('error: local (%s) and global (%s) Locomotive modules do not match', require('locomotive').version, this.version));
 	}
 
+	this.apiRoot = "/stubAPI/";
+	this.fileRoot = "/";
+	
 	this.cipher = crypto.createCipher('aes-256-cbc', AES_CIPHER_KEY);
 	this.decipher = crypto.createDecipher('aes-256-cbc', AES_CIPHER_KEY);
 
-    // Path for images
-    this.imgPathMobile = "/img/mobile";
-    this.imgPathX1     = "/img/x1";
-    this.imgPathX2     = "/img/x2";
+	// Path for images
+	this.imgPathMobile = "/img/mobile";
+	this.imgPathX1     = "/img/x1";
+	this.imgPathX2     = "/img/x2";
 
 	this.use(express.logger());
 	this.use(express.cookieParser(COOKIE_SECRET));
@@ -34,10 +41,39 @@ module.exports = function() {
 	this.use(express.methodOverride());  // Emulate full REST capabilities (GET, POST, PUT & DELETE) via a hidden form field named _method
 	this.use(express.compress());
 	this.use(express.favicon(path.join(__dirname, FAVICON_FULL_PATH), {maxAge: staticContentMaxAge}));
-	this.use(express.static(path.join(__dirname, STATIC_CONTENT_FULL_PATH), {maxAge: staticContentMaxAge}));
+	this.use(express.static(path.join(__dirname, STATIC_CONTENT_FULL_PATH)));
+//	this.use(express.static(path.join(__dirname, STATIC_CONTENT_FULL_PATH), {maxAge: staticContentMaxAge}));
 	this.use(i18n.init); // localization
 	this.use(viewLocale(this)); // set up "lambdas" for {{#__}} and {{#localize}} in the markup
 	
+	// oembed support for the player
+	this.use('/oembed', oembed(function(req, res, next) {
+
+		// check to see if our 'player' endpoint has been called and extract the id of a game	 
+		var urlRegEx = /^http:\/\/choreo\.co\/player\/([a-zA-Z0-9_]+)/;
+		var matched = urlRegEx.exec(req.oembed.url);
+		if (matched != null) {
+			var gameId = matched[1];
+			if (gameId == null || gameId == "") gameId = "No game parameter specified.";
+
+			var options = {
+				"title": "Choreo Game",
+//				"author_name": "Bees",
+//				"author_url": "http://www.flickr.com/photos/bees/",
+				"provider_name": "Choreo",
+				"provider_url": "http://www.choreo.co"
+			};
+
+			res.oembed.rich(
+				"<p>" + gameId + "</p>", // html -- TBD: serve the real fragment
+				200,  // width 
+				100,  // height
+				options);
+		}
+		else
+			next();
+		}));
+
 	//Route requests
 	this.use(this.router);
 

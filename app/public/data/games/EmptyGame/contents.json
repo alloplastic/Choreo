@@ -1,0 +1,12 @@
+{
+	"id": "",
+	"choreoVersion": 1,
+	"name": "New Game",
+	"firstScene": "Scene0",
+	"scenes": [{
+		"id": "Scene0",
+		"name": "- 1 -",
+		"kits": [],
+		"entities": []
+	}]
+}

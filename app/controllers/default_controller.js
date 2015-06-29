@@ -4,17 +4,33 @@
  * Build out this controller to create a web app around the choreo editor.
  */
 
-var DefaultController = new (require('locomotive').Controller)()
-,	ParentController = require('./../controller.js')
-,	i18n = require('../../config/extensions/i18n-namespace');
+var DefaultController = new (require('locomotive').Controller)();
+var ParentController = require('./../controller.js');
+var HomeModel = require('../models/choreo/home_model');
+var PlayerModel = require('../models/choreo/player_model');
+var i18n = require('../../config/extensions/i18n-namespace');
 
 	/**
 	 * Main page containing the full editor layout
 	 */
 	DefaultController.main = function() {
+
 		ParentController.__addNoCacheHeaders.call(this);
 		this.page = false;
-		this.render('./index');
+
+		var model = new HomeModel();
+		var playerModel = new PlayerModel();
+
+		// TBD: maybe not so elegant: adding all player-model props to the main model so that it can render correctly
+		for (var p in playerModel) {
+			if (playerModel.hasOwnProperty(p)) model[p] = playerModel[p];
+		}
+
+		model.apiRoot = this.app.apiRoot;
+		model.fileRoot = this.app.fileRoot;
+		model.gameAssetRoot = this.app.fileRoot + 'data/games/';
+
+		this.render('./index', model);
 	};	
 
 	/**
@@ -30,7 +46,6 @@ var DefaultController = new (require('locomotive').Controller)()
 		// Behave like a pure API call.  Let the client refresh the page.
 		this.__res.json({result: "thanks"});
 	};
-
 
 	/**
 	 * After the controller's functions are created, before() and after() methods can be registered with

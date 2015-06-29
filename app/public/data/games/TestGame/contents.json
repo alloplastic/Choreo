@@ -1,0 +1,18 @@
+{
+	"id": "TestGame",
+	"choreoVersion": 1,
+	"name": "Test Game",
+	"firstScene": "SceneOne",
+	"scenes": [{
+		"id": "SceneOne",
+		"name": "One",
+		"kits": ["Kit2dGamePhaser_v1"],
+		"entities": [{
+			"id": "Logo",
+			"type": "EPhaserSprite",
+			"images": ["phaser.png"],
+			"spritesheet": "",
+			"animations": []
+		}]
+	}]
+}

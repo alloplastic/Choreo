@@ -5,9 +5,11 @@
  * 
  */
 
-var locomotive = require('locomotive')
-,	ParentController = locomotive.Controller
-,	i18n = require('../config/extensions/i18n-namespace');
+var locomotive = require('locomotive');
+var ParentController = locomotive.Controller;
+var i18n = require('../config/extensions/i18n-namespace');
+var Q = require('q');
+var request = require("request");
 
 //Begin Parent Controller
 	ParentController.parentOf = function(AppController, requireLoggedIn, requireNotLoggedIn){		
@@ -130,6 +132,7 @@ ParentController.__processPage = function() {
 		return function () {
 			return function (text, render) {
 				if (self.__res.statusCode == code) {
+					console.log("PROCESS PAGE text = " + text)
 					return render ? render(text) : text;
 				}
 				return "";
@@ -150,5 +153,52 @@ ParentController.__processPage = function() {
         this.__res.header("Expires", -1);
         this.__res.header("Pragma", "no-cache");
     };
+	
+	/**
+	 * Promise-based request
+	 */
+	ParentController.__request = function(requestObj) {
+ 
+		var deferred = Q.defer();
+		
+		request(requestObj, function(err, res, body) {
+
+			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
+
+			if (typeof body !== 'undefined' && !err) {
+				//Parse result into JSON
+				var result = JSON.parse(body);				
+				deferred.resolve(result);
+			} else {
+				deferred.reject({status: "error"});
+			}
+		});
+		
+		return deferred.promise;
+	};
+
+	/**
+	 * Promise-based request
+	 */
+	ParentController.__requestRaw = function(requestObj) {
+ 
+		var deferred = Q.defer();
+		
+		request(requestObj, function(err, res, body) {
+
+			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
+
+//			console.log("code = " + statusCode + "\nerr = " + err + "\nbody = " + body);
+
+			// success on 2xx and 3xx HTTP responses
+			if (statusCode && statusCode < 400) {
+				deferred.resolve(body);
+			} else {
+				deferred.reject("");
+			}
+		});
+		
+		return deferred.promise;
+	};
 	
 module.exports = ParentController;

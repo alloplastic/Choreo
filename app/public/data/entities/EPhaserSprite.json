@@ -1,0 +1,7 @@
+{
+	"id": "EPhaserSprite",
+	"name": "Sprite for Phaser Game Engine",
+	"icon": "",
+	"editors": ["blocks", "image", "spritesheet"],
+	"block-sets": ["standard", "phaser"]
+}
