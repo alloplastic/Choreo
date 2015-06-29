@@ -20,6 +20,7 @@ if (!ChoreoEditorModel) {
 			this.data = {
 				choreoVersion: 1,
 				currentScene: "",
+				currentSceneIndex: 0,
 				currentLayer: 0,
 				currentEntity: "",
 				playerState: {
@@ -35,19 +36,53 @@ if (!ChoreoEditorModel) {
 			this.data.currentScene = gameData.firstScene;
 
 			if (gameData.scenes && gameData.scenes.length > 0) {
-				this.data.currentScene = gameData.firstScene;
-				if (!gameData.scenes[0].kits || gameData.scenes[0].kits.length<=0) {
+
+				var sceneIndex = -1;
+				for (var i=0; i<gameData.scenes.length; i++) {
+					if (gameData.scenes[i].id == gameData.firstScene) {
+						sceneIndex = i;
+						break;
+					}
+				}
+
+				if (sceneIndex == -1) {
+					console.log('ChoreoEditorModel: first scene not found: ' + gameData.firstScene);
+					return;
+				}
+
+				var curScene = gameData.scenes[sceneIndex];
+
+				_c.set(this, 'data/currentSceneIndex', sceneIndex);
+				_c.set(this, 'data/currentScene', gameData.firstScene);
+
+				if (!curScene.kits || curScene.kits.length<=0) {
 					_c.set(this, 'data/currentLayer', -1);
 					_c.set(this, 'data/currentEntity', -1);
-	//				this.data.currentLayer = -1;  // else start at 0
-	//				this.data.currentEntity = -1;
-				} else if (!gameData.scenes[0].entitites || gameData.scenes[0].entitites.length <= 0) {
+
+				} else if (!curScene.entitites || curScene.entitites.length <= 0) {
+					_c.set(this, 'data/currentLayer', 0);
 					_c.set(this, 'data/currentEntity', -1);
-	//				this.data.currentEntity = -1;
+				} else {
+					_c.set(this, 'data/currentLayer', 0);
+					_c.set(this, 'data/currentEntity', 0);
 				}
-				// otherwise, the 0 default indices are what we want
 			}
 
+		},
+
+		setCurrentScene: function(index) {
+
+			var gameData = _c.editor.gameData;
+
+			if (index<0 ||
+				!gameData.scenes ||
+				gameData.scenes.length < index)
+				return;
+
+			var sceneId = gameData.scenes[index].id;
+
+			_c.set(this, 'data/currentSceneIndex', index);
+			_c.set(this, 'data/currentScene', sceneId);
 		}
 
 	};

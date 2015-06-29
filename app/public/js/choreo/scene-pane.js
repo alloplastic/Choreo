@@ -35,6 +35,7 @@ if (!ChoreoScenePane) {
 					scenes.push(newScene);
 					_c.set(_c.editor, 'gameData/scenes', scenes);
 				}
+				_c.editor.uiState.setCurrentScene(ui.newTab.index());
 			}
 		});
 
@@ -42,8 +43,9 @@ if (!ChoreoScenePane) {
 
 
 		// register for notifications about the game data changing
-		_c.observe(_c.editor, "gameData/scenes", this, "onSceneDataChanged");		
-		_c.observe(_c.editor.uiState, "data", this, "onUIDataChanged");		
+		_c.observe(_c.editor, "gameData/scenes", this, "onSceneDataChanged");
+		_c.observe(_c.editor.uiState, "data/currentScene", this, "onUIDataChanged");	
+		_c.observe(_c.editor.uiState, "data/currentLayer", this, "onUIDataChanged");	
 	};
 
 	ChoreoScenePane.prototype.onSceneDataChanged = function(changes) {
@@ -176,16 +178,21 @@ if (!ChoreoScenePane) {
 		//var i, a, div;
 
 		//var $tabParent = $(".layers-pane-tabs > ul");
-		var $tabs = $(".layers-pane-tabs > ul > li");
+//		var $tabs = $(".layers-pane-tabs > ul > li");
+
+		var curSceneIndex = _c.editor.uiState.data.currentSceneIndex;
+		var curLayer = _c.editor.uiState.data.currentLayer;
 
 		// clear any 'selected' highlight state
-		$a = $(".layers-pane-tabs > ul > li > a");
+		$a = $('.layers-pane-tabs > #layers-pane-tab-' + curSceneIndex + ' > div');
 		for (i=0; i<$a.length-1; i++) {
-			$a[i].removeClass('item-selected');
+			$($a[i]).removeClass('item-selected');
 		}
 
-		if (_c.editor.uiState.currentLayer >= 0) {
-			$a[_c.editor.uiState.currentLayer].addClass('item-selected')
+		if (_c.editor.uiState.data.currentLayer >= 0) {
+			var a = $($a[curSceneIndex]);
+			a.addClass('item-selected')
+//			$($a[curScene]).addClass('item-selected')
 		}
 	};
 
