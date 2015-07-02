@@ -1,6 +1,7 @@
 {
 	"id": "Kit2dGamePhaser_v1",
 	"name": "Kit2dGamePhaser",
+	"icon": "icon.png",
 	"friendlyName": "2D Game (phaser)",
 	"version": "v1",
 	"choreoVersion": 1,

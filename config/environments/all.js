@@ -5,6 +5,7 @@ var express = require('express')
 ,	crypto = require('crypto')
 ,	i18n = require('../extensions/i18n-namespace'),
 	oembed = require('connect-oembed');
+	Q = require('q');
 //	http = require('http');
 
 //http.globalAgent.maxSockets = 10;
@@ -26,6 +27,9 @@ module.exports = function() {
 	this.apiRoot = "/stubAPI/";
 	this.fileRoot = "/";
 	
+	// cache to minimize the number of asynchronous requests for individual kits
+	this.kitCache = {};
+
 	this.cipher = crypto.createCipher('aes-256-cbc', AES_CIPHER_KEY);
 	this.decipher = crypto.createDecipher('aes-256-cbc', AES_CIPHER_KEY);
 
@@ -76,10 +80,13 @@ module.exports = function() {
 
 	//Route requests
 	this.use(this.router);
+	this.use(express.errorHandler());  // must be last middleware in chain
 
 	// hrefLangs contains a list of supported languages; helps with search engine optimization
 	// see: https://support.google.com/webmasters/answer/189077?hl=en
 	this.hrefLangs = ["fr", "en"];
+
+	// TBD: okay to kick off queries right away to prepopulate a cache?
 
 };
 

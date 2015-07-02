@@ -1,17 +1,25 @@
 // A dead simple client-side web "framework," largely tailored to the needs of the Choreo app
 
-// TBD: extract to Straight.js: "the non-framework"
-
-
-
-
 if (_c === undefined || _c === null) {
 
 	// since JS doen't align nicely with classical OOP, just parasite Choreo on top of an
 	// instance of Straight.
-	var _Choreo = function() {
+	var _Choreo = function(options) {
+
+		options = options || {};
+
 		// seems like funky syntax, but any instance of "Choreo" would require its own instance of Straight
 		this.__proto__.__proto__ = new Straight();
+
+		this.apiRoot = options.apiRoot || '/';
+		this.fileRoot = options.fileRoot || '/';
+		this.gameAssetRoot = '/';
+
+		this.player = null;
+		this.players = {};
+
+		this.sdks = {};
+
 	};
 
 

@@ -43,9 +43,10 @@ if (!ChoreoScenePane) {
 
 
 		// register for notifications about the game data changing
-		_c.observe(_c.editor, "gameData/scenes", this, "onSceneDataChanged");
-		_c.observe(_c.editor.uiState, "data/currentScene", this, "onUIDataChanged");	
-		_c.observe(_c.editor.uiState, "data/currentLayer", this, "onUIDataChanged");	
+		_c.observe(_c.editor, "gameData/scenes/@@@", this, "onSceneDataChanged");
+		_c.observe(_c.editor.uiState, "data/@@@", this, "onUIDataChanged");	
+		// _c.observe(_c.editor.uiState, "data/currentScene", this, "onUIDataChanged");	
+		// _c.observe(_c.editor.uiState, "data/currentLayer", this, "onUIDataChanged");	
 	};
 
 	ChoreoScenePane.prototype.onSceneDataChanged = function(changes) {
@@ -111,9 +112,23 @@ if (!ChoreoScenePane) {
 			if (kits && kits.length>0) {
 				for (var j=0; j<kits.length; j++) {
 
+					var kitName = kits[j];
 					var newLayerItem = $layerItemTemplate.clone().removeClass('template');
 
 					a = newLayerItem.find('a');
+					var span = newLayerItem.find('span');
+					var img = newLayerItem.find('img');
+
+					if (kitName != null &&
+						_c.editor.gameData._refs != null &&
+						_c.editor.gameData._refs.kits != null) {
+						var kit = _c.editor.gameData._refs.kits[kitName];
+						if (kit != null) {
+							if (kit.friendlyName != null) span.text(kit.friendlyName);
+							if (kit.icon != null) img.attr('src', kit.icon);  // server provides complete url							
+						}
+					} 
+
 					a.click(j, function (e) {
 						console.log('setting current layer to ' + e.data);
 						_c.set(_c.editor.uiState, 'data/currentLayer', e.data);

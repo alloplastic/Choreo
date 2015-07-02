@@ -16,18 +16,10 @@
 		this.observedObjects = [];   // hack to derive an index/id for each observed object
 		this.observationCallbacks = [];
 		this.observationEventQueue = [];
+		this.relationships =[[{}]];  // path relationships bwtween objects that might reference each other
 
 		// a map of message names to arrays of listeners
 		this.messages = {};
-
-		this.apiRoot = options.apiRoot || '/';
-		this.fileRoot = options.fileRoot || '/';
-		this.gameAssetRoot = '/';
-
-		this.player = null;
-		this.players = {};
-
-		this.sdks = {};
 
 		this.delim = '/';   //aligns with REST syntax and doesn't conflict with regex (unlike '.')
 
@@ -162,7 +154,19 @@
 			index = parseInt(lastProp);
 			if (!isNaN(index)) lastProp = index;
 
+			var oldObj = obj[lastProp];
+
 			obj[lastProp] = value;   // TBD: should probably strictly require obj to be an array here
+
+			// if we just overwrote a reference to an object that we are observing, recalculate the map of relationships
+			// between observed objects;  TBD: could result in two calls to this.recalculateRelationMap(), due to
+			// subsequent call to addObservedObjectIfNecessary(), but this should be rare.
+
+			if (this.observedObjects.indexOf(oldObj) != -1) 
+				this.recalculateRelationMap();
+
+			// track any root object on which set() has been called, so that observers on parent objects can be called
+			this.addObservedObjectIfNecessary(rootObj);
 
 			this.queueObservationEvent(rootObj, propPath, value, "set");
 
@@ -178,26 +182,27 @@
 				return false;
 
 			var prop = propPath;
-			var lastDelim = prop.lastIndexOf(".");
+			var lastDelim = prop.lastIndexOf(this.delim);
 
 			// find the parent object of the leaf to be deleted 
+			var parent = obj;
 			if (lastDelim >= 0) {
 				prop = propPath.substring(lastDelim+1);
 				var prefixPath = propPath.substring(0, lastDelim);
-				obj = this.get(obj, prefixPath);
+				parent = this.get(obj, prefixPath);
 			}
 
-			if (obj && prop && prop.length>0) {
+			if (parent && prop && prop.length>0) {
 
 				var index = parseInt(prop);
 				if (!isNaN(index)) {   // integer properties are expected to be array indices
-					if (Array.isArray(obj)) {
-						obj.splice(index, 1);
+					if (Array.isArray(parent)) {
+						parent.splice(index, 1);
 					} else {
 						return false;
 					}
 				} else {
-					delete obj[prop];
+					delete parent[prop];
 				}
 
 			} else {
@@ -220,7 +225,7 @@
 				// if *** not present, anchor the match string to the end
 				propPath = '^' + propPath + '$';
 			} else {
-				// to match any suffix, just delete the '***' and don't anchor the regex at the end
+				// to match any suffix, just delete the '@@@' and don't anchor the regex at the end
 				propPath = '^' + propPath.substring(0, propPath.length-4);
 			}
 
@@ -230,26 +235,14 @@
 			// replace '#' characters with regex for matching any single character between the delimiters ('/')
 			propPath = propPath.replace(/#/g, '/[^\/]/'); 
 
+			this.addObservedObjectIfNecessary(obj);
+
 			// unpleasant syntax since in JS objects can't be keys, made worse by having to keep parallel data structures for things
 			// like callback names.
 
-			var observation;
-
 			var o = this.observedObjects.indexOf(obj);
-			if (o < 0) {
-
-				this.observedObjects.push(obj);   // a way of creating a unique id for each object internally, without decorating
-				o = this.observedObjects.length-1;
-				observation = {};
-				this.observations[o] = observation;
-
-				callbackStruct = {};
-				this.observationCallbacks[o] = callbackStruct;			
-
-			} else {
-				observation = this.observations[o];
-				callbackStruct = this.observationCallbacks[o];
-			}
+			var observation = this.observations[o];
+			callbackStruct = this.observationCallbacks[o];
 
 			var listeners = observation[propPath];
 			var funcNames = callbackStruct[propPath];
@@ -272,6 +265,8 @@
 			}
 		},
 
+		// stops a specific observation, leaving intact the data structures representing the space of
+		// objects being observed.
 		stopObservation: function(obj, propPath, listeningObj) {
 
 			var o = this.observadObjects.indexOf(obj);
@@ -290,74 +285,201 @@
 			this.observations = [];
 			this.observedObjects = [];
 			this.observationCallbacks = [];
+			this.observationEventQueue = [];  // judgement call to clear this, but stop all is stop all
+			this.relationships =[[{}]];
 		},
 
+		/*
+		 * @protected
+		 */
 		queueObservationEvent: function(obj, propPath, value, op) {
 			// TBD: reject dupes and "parent" value changes when children have already changed
 			this.observationEventQueue.push({object: obj, path: propPath, value: value, operation: op});
 		},
 
+		/*
+		 * @protected
+		 */
+		addObservedObjectIfNecessary: function(obj) {
+
+			var o = this.observedObjects.indexOf(obj);
+			if (o < 0) {
+
+				this.observedObjects.push(obj);   // a way of creating a unique id for each object internally, without decorating
+				o = this.observedObjects.length-1;
+				observation = {};
+				this.observations[o] = observation;
+
+				callbackStruct = {};
+				this.observationCallbacks[o] = callbackStruct;
+
+				this.recalculateRelationMap();
+			}
+		},
+
+		/**
+		 * Rebuilds our picture of the relationships between the observed objects, for those that are part of the same
+		 * nested js object.  TBD: Is brute force to do this every time there is a change...
+		 * @method
+		 * @protected
+		 */
+		recalculateRelationMap: function() {
+
+			for (var i=0; i<this.observedObjects.length; i++) {
+				var obj = this.observedObjects[i];
+				if (this.relationships.length < i+1) this.relationships.push([]);
+				// for each observed object, check to see if any of the *other* objects are contained
+				// within it and store a path relationship to be applied to set() notifications
+				for (var j=0; j<this.observedObjects.length; j++) {
+					var obj2 = this.observedObjects[j];
+					if (this.relationships[i].length < j+1) this.relationships[i].push({});
+					var relationshipData = this.relationships[i][j];
+					if (obj != obj2) {
+						// store any response so that we can use the array indices for navigation
+						relationshipData.path = this.pathToObject(obj, obj2, []);  // third argument required as an optimization
+					}
+					else {
+						relationshipData.path = null;  // ditto, just want to have a record for every object
+					}
+				}
+			}
+		},
+
+		/*
+		 * recursive function for tracing the parent-child relationship of two objects
+		 * @protected
+		 */
+		pathToObject: function(startObj, endObj, seenObjects) {
+
+			// success; return a string to kick off the construction of the path
+			if (startObj == endObj) return '';
+
+			// ES5 syntax... much better; doesn't work in IE8 and similar era browsers
+			// actually works for arrays, too; only issue is that empty values are skipped, but that's fine for this algorithm
+			var props = Object.keys(startObj);
+
+			var numProps = props.length;
+			if (numProps <= 0) return null;
+
+			for (var i=0; i<numProps; i+=1) {
+				var prop = props[i];
+				var child = startObj[prop];
+				if (seenObjects.indexOf(child) != -1) return null;  // circular reference & no match found yet
+				seenObjects.push(child);
+				// each branch of the tree needs its own array; TBD: could reuse a few of the arrays...
+				var childPath = this.pathToObject(child, endObj, seenObjects.slice());
+				if (childPath!=null) {
+					childPath = prop + '/' + childPath;
+					return(childPath);
+				} else {
+					return null;
+				}
+			}
+		},
+
+		/*
+		 * @protected
+		 */
 		fireObservationEvents: function() {
 
 			// marshall all events for a particular listener-path combination into a single notification
 
 			var eventsForEachListener = {};
 			var listener, allListeners =[];
+			var i, record;
 
 			// TBD: possibly optimize by sorting the property lists and looping through once instead of looking up props
 
 			for (var e=0, numEvents=this.observationEventQueue.length; e<numEvents; e+=1) {
 
-				var observationEvent = this.observationEventQueue[e];
+				var changeEvent = this.observationEventQueue[e];
 
-				var o = this.observedObjects.indexOf(observationEvent.object);
-				if (o < 0) continue;
-				var observation = this.observations[o];
-				var callbackStruct = this.observationCallbacks[o];
+				// Find all objects that might care about changes on changeEvent.obj (parent objects, basically),
+				// along with the path suffix representing the relatinship between the two.  Then run each one through
+				// the matching process below.
 
-				for (var path in observation) {
-					if (observation.hasOwnProperty(path)) {
+				var observationsToCheck = [];
 
-						// need to match two conditions: (1) the regex definiing the exact piece of data to watch and whether
-						// to watch children of this data field and (2) a wholesale change to a parent data field.
+				// should exist for any notification, since set() creates an observer entry for every root object it receives
+				var o = this.observedObjects.indexOf(changeEvent.object);
+				if (o >= 0) {
+					var record = {};
+					record.index = o;
+					record.observation = this.observations[o];
+					record.callbackStruct = this.observationCallbacks[o];
+					record.suffix = '';
+					observationsToCheck.push(record);
+				} else {
+					continue;  // current scheme expects any objects passed to set() or observe() to exist in observedObjects
+				}
 
-						// if the straight observer pattern doesn't match, check to see if the change is happening to a parent
-						// of us.
+				// find all paths from other objects to us
+				for (i=0; i<this.observedObjects.length; i++) {
+					if (i==o) continue;
+					var relationship = this.relationships[i][o];
+					if (relationship.path != null) {
+						var record = {};
+						record.index = o;
+						record.observation = this.observations[i];
+						record.callbackStruct = this.observationCallbacks[i];
+						record.suffix = relationship.path;
+						observationsToCheck.push(record);
+					}
+				}
 
-						var match=false;
-						if (!observationEvent.path.match(path)) {
+				for (var r=0; r<observationsToCheck.length; r++) {
 
-							var numDelimsInPath = (observationEvent.path.match(/\//g) || []).length;   // TBD: hard-wired to delim = '/'
-							var numDelimsInObservationPath = (path.match(/\//g) || []).length;
+					var observationRecord = observationsToCheck[r];
+					var observation = observationRecord.observation;
+					var origPath = changeEvent.path;
+					var changedPath  = observationRecord.suffix + origPath;
 
-							if (numDelimsInObservationPath > numDelimsInPath) {
-								var tokens = path.split(this.delim).slice(0, numDelimsInPath+1);
-								var subPath = tokens.join(this.delim);
-								match = observationEvent.path.match(subPath); 
+					for (var path in observation) {
+
+						if (observation.hasOwnProperty(path)) {
+
+							// need to match two conditions: (1) the regex definiing the exact piece of data to watch and whether
+							// to watch children of this data field and (2) a wholesale change to a parent data field.
+
+							// if the straight observer pattern doesn't match, check to see if the change is happening to a parent
+							// of us.
+
+							var match=false;
+							if (!changedPath.match(path)) {
+
+								var numDelimsInEventPath = (changedPath.match(/\//g) || []).length;   // TBD: hard-wired to delim = '/'
+								var numDelimsInObservationPath = (path.match(/\//g) || []).length;
+
+								if (numDelimsInObservationPath > numDelimsInEventPath) {
+									var tokens = path.split(this.delim).slice(0, numDelimsInEventPath+1);
+									var subPath = tokens.join(this.delim);
+									match = changedPath.match(subPath); 
+								}
+
+							} else {
+								match = true;
 							}
 
-						} else {
-							match = true;
-						}
+							if (match) {
 
-						if (match) {
+								var listeners = observation[path];
+								if (listeners == null || listeners.length <= 0) continue;
 
-							var listeners = observation[path];
-							if (listeners == null || listeners.length <= 0) continue;
+								var callbackStruct = observationRecord.callbackStruct;
+								var funcNames = callbackStruct[path];
 
-							var funcNames = callbackStruct[path];
-
-							for (var i=0, len=listeners.length; i<len; i+=1) {
-								listener = listeners[i];
-								funcName = funcNames[i];
-								var l = allListeners.indexOf(listener);
-								if (l<0) {
-									allListeners.push(listener);
-									l = allListeners.length-1;
+								for (var i=0, len=listeners.length; i<len; i+=1) {
+									listener = listeners[i];
+									funcName = funcNames[i];
+									var l = allListeners.indexOf(listener);
+									if (l<0) {
+										allListeners.push(listener);
+										l = allListeners.length-1;
+									}
+									if (eventsForEachListener[l] == null) eventsForEachListener[l] = {};
+									if (eventsForEachListener[l][funcName] == null) eventsForEachListener[l][funcName] = [];
+									eventsForEachListener[l][funcName].push(changeEvent);
 								}
-								if (eventsForEachListener[l] == null) eventsForEachListener[l] = {};
-								if (eventsForEachListener[l][funcName] == null) eventsForEachListener[l][funcName] = [];
-								eventsForEachListener[l][funcName].push(observationEvent);
 							}
 						}
 					}
@@ -373,6 +495,9 @@
 			this.observationEventQueue = [];
 		},
 
+		/*
+		 * @protected
+		 */
 		tick: function() {
 			this.fireObservationEvents();
 		},

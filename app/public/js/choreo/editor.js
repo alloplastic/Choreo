@@ -162,6 +162,7 @@
 		ChoreoEditor.prototype.loadGame = function(id) {
 
 			var self = this;
+
 			$.getJSON( this.apiRoot + "games/" + id, function(data) {
 				if (data != null && data.status != 'error') {
 
@@ -175,6 +176,25 @@
 					self.initEditorState(data);  // recalculate this.uiState
 				}
 			});
+
+			// get the game definition and the 
+			// var gameRequest = $.getJSON( this.apiRoot + "games/" + id);
+			// var kitsRequest = $.getJSON( this.apiRoot + "games/" + id + '/kits');
+
+			// $.when(gameRequest, jqxhr2).done(function(gameData, jqxhr2) {
+			// 	// Though observers won't be propagated until after all JS in a given timestep finishes, we still
+			// 	// need to be particular about the order of operations when updating the data, since we also want some
+			// 	// code to respond to minor changes to UI state later.  So, the most logical sequence of actions is
+			// 	// (1) tear down the old player and get a new one loading the new data, (2) replace the editor's
+			// 	// gameData, triggering UI refreshes, and (3) recalculate the UI state now that we have new data.
+			// 	_c.set(self, "gameData", data);
+			// 	self.runGame(data);  // launch a player with the new data
+			// 	self.initEditorState(data);  // recalculate this.uiState
+			// })
+			// .fail(function() {
+
+			// });
+
 		};
 
 		ChoreoEditor.prototype.runGame = function(gameData) {
