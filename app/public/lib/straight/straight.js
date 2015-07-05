@@ -1,6 +1,16 @@
 // A dead simple client-side web "framework," largely tailored to the needs of the Choreo app
 
-// TBD: extract to Straight.js: "the non-framework"
+// TBD: to deal with cross-references of inner properties, could add the notion of an 'equivalence' a mapping of
+// an object to a path off of another object.  On set(), this can be used to generate another queued event for
+// matching.  When the set() happens within the original object, the path could be exapnded as it currently is
+// using pathways from other objects to the location of the set().  If one of these matches an equivalence rule,
+// delete the equivalence path from the beginning of the event path and attempt a match.
+
+// Auto-generating these probably involves searching all objects in the system for occurrences of the
+// given object.  A path-to-self calculation, essentially, yielding a list of results, and needing to be recalculated
+// every time a new base object is added to the system.  Probably after every set(), actually...
+
+// Worth the pain?
 
 (function(window) {
 
@@ -356,7 +366,7 @@
 
 			// ES5 syntax... much better; doesn't work in IE8 and similar era browsers
 			// actually works for arrays, too; only issue is that empty values are skipped, but that's fine for this algorithm
-			var props = Object.keys(startObj);
+			var props = Object.keys(startObj).slice();
 
 			var numProps = props.length;
 			if (numProps <= 0) return null;
@@ -364,6 +374,7 @@
 			for (var i=0; i<numProps; i+=1) {
 				var prop = props[i];
 				var child = startObj[prop];
+				if (child == null || typeof child != 'object') continue;  // bail when hit a non-object leaf
 				if (seenObjects.indexOf(child) != -1) return null;  // circular reference & no match found yet
 				seenObjects.push(child);
 				// each branch of the tree needs its own array; TBD: could reuse a few of the arrays...
@@ -372,9 +383,11 @@
 					childPath = prop + '/' + childPath;
 					return(childPath);
 				} else {
-					return null;
+					continue;  // try the next property
 				}
 			}
+
+			return null;
 		},
 
 		/*

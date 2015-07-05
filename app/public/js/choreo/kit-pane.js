@@ -24,7 +24,12 @@ if (!ChoreoKitPane) {
 
 		// register for notifications about the game data changing
 		_c.observe(_c.editor, "gameData/scenes/@@@", this, "onSceneDataChanged");
-		_c.observe(_c.editor, "uiState/@@@", this, "onUIDataChanged");	
+
+		// rebuild the entire list of entity types whenever a key ui value changes
+		_c.observe(_c.editor.uiState, "data/currentScene", this, "onSceneDataChanged");
+		_c.observe(_c.editor.uiState, "data/currentLayer", this, "onSceneDataChanged");
+
+//		_c.observe(_c.editor, "uiState/@@@", this, "onUIDataChanged");	
 	};
 
 	ChoreoKitPane.prototype.onSceneDataChanged = function(changes) {
@@ -52,7 +57,7 @@ if (!ChoreoKitPane) {
 			return;
 		}
 
-		var currentSceneIndex = _c.get(_c.editor, 'uiState/currentSceneIndex');
+		var currentSceneIndex = _c.get(_c.editor, 'uiState/data/currentSceneIndex');
 
 		if (numScenes <= currentSceneIndex) {
 			console.log('kit-panel: scene index exceeds the number of scenes: ' + currentSceneIndex);
@@ -62,7 +67,7 @@ if (!ChoreoKitPane) {
 		var currentScene = scenes[currentSceneIndex];
 		var kits = currentScene.kits;  // a list of unique ids of the kits used by the scene
 
-		var currentLayer = _c.get(_c.editor, 'uiState/currentLayer');
+		var currentLayer = _c.get(_c.editor, 'uiState/data/currentLayer');
 
 		if (kits == null || kits.length <=0 || currentLayer >= kits.length) {
 			console.log('kit-panel: unable to locate layer data: ' + currentLayer);
@@ -95,24 +100,11 @@ if (!ChoreoKitPane) {
 
 	};
 
-	ChoreoScenePane.prototype.onUIDataChanged = function(changes) {
+	ChoreoKitPane.prototype.onUIDataChanged = function(changes) {
 
 		console.log("UI changes to Kit Pane.");
 
-// 		var curSceneIndex = _c.editor.uiState.data.currentSceneIndex;
-// 		var curLayer = _c.editor.uiState.data.currentLayer;
-
-// 		// clear any 'selected' highlight state
-// 		$a = $('.layers-pane-tabs > #layers-pane-tab-' + curSceneIndex + ' > div');
-// 		for (i=0; i<$a.length-1; i++) {
-// 			$($a[i]).removeClass('item-selected');
-// 		}
-
-// 		if (_c.editor.uiState.data.currentLayer >= 0) {
-// 			var a = $($a[curSceneIndex]);
-// 			a.addClass('item-selected')
-// //			$($a[curScene]).addClass('item-selected')
-// 		}
+		// TBD, if we decide to let the user select entity types
 	};
 
 }

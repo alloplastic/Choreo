@@ -94,7 +94,6 @@
 	.kit-pane {
 		width: auto;
 		margin-left: @choreo-margin-width;
-		padding: .5em .5em .5em .5em;
 		.flex(30, 0, auto);
 		.display-flex;
 		.flex-flow(column);
@@ -102,6 +101,7 @@
 
 	.kit-pane-content {
 		.flex(1, 1, auto);
+		padding: .5em .5em .5em .5em;
 	}
 
 	.gallery-pane {
@@ -223,7 +223,7 @@
 		position: relative;
 		width: 6em;
 		height: 6em;
-		cursor: move;
+		.cursor-grab;
 		font-size: @choreo-font-size-small;
 
 		div {
@@ -238,7 +238,6 @@
 	//			max-width: 3em;
 	//			max-height: 3em;
 				margin: 0em auto 0em auto;
-				cursor: move;
 			}
 
 		}

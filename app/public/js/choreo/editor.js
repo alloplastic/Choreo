@@ -14,8 +14,7 @@
 			this.fileRoot = options.fileRoot || _c.fileRoot || '/';
 
 			this.gameData = {};
-			this.uiStateModel = new ChoreoEditorModel();
-			this.uiState = this.uiStateModel.data;  // extra reference to aupport prettier _c.get() paths
+			this.uiState = new ChoreoEditorModel();
 
 			// sub-components
 
@@ -158,7 +157,7 @@
 		ChoreoEditor.prototype.initEditorState = function(gameData) {
 
 			if (gameData != null) {
-				this.uiStateModel.defaultsForGame(gameData);
+				this.uiState.defaultsForGame(gameData);
 			}
 		};
 
