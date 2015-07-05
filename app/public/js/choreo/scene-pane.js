@@ -35,7 +35,7 @@ if (!ChoreoScenePane) {
 					scenes.push(newScene);
 					_c.set(_c.editor, 'gameData/scenes', scenes);
 				}
-				_c.editor.uiState.setCurrentScene(ui.newTab.index());
+				_c.editor.uiStateModel.setCurrentScene(ui.newTab.index());
 			}
 		});
 
@@ -44,7 +44,7 @@ if (!ChoreoScenePane) {
 
 		// register for notifications about the game data changing
 		_c.observe(_c.editor, "gameData/scenes/@@@", this, "onSceneDataChanged");
-		_c.observe(_c.editor.uiState, "data/@@@", this, "onUIDataChanged");	
+		_c.observe(_c.editor, "uiState/@@@", this, "onUIDataChanged");	
 		// _c.observe(_c.editor.uiState, "data/currentScene", this, "onUIDataChanged");	
 		// _c.observe(_c.editor.uiState, "data/currentLayer", this, "onUIDataChanged");	
 	};
@@ -131,7 +131,7 @@ if (!ChoreoScenePane) {
 
 					a.click(j, function (e) {
 						console.log('setting current layer to ' + e.data);
-						_c.set(_c.editor.uiState, 'data/currentLayer', e.data);
+						_c.set(_c.editor, 'uiState/currentLayer', e.data);
 					});
 
 					newTabContent.append(newLayerItem);
@@ -195,8 +195,8 @@ if (!ChoreoScenePane) {
 		//var $tabParent = $(".layers-pane-tabs > ul");
 //		var $tabs = $(".layers-pane-tabs > ul > li");
 
-		var curSceneIndex = _c.editor.uiState.data.currentSceneIndex;
-		var curLayer = _c.editor.uiState.data.currentLayer;
+		var curSceneIndex = _c.editor.uiState.currentSceneIndex;
+		var curLayer = _c.editor.uiState.currentLayer;
 
 		// clear any 'selected' highlight state
 		$a = $('.layers-pane-tabs > #layers-pane-tab-' + curSceneIndex + ' > div');
@@ -204,7 +204,7 @@ if (!ChoreoScenePane) {
 			$($a[i]).removeClass('item-selected');
 		}
 
-		if (_c.editor.uiState.data.currentLayer >= 0) {
+		if (_c.editor.uiState.currentLayer >= 0) {
 			var a = $($a[curSceneIndex]);
 			a.addClass('item-selected')
 //			$($a[curScene]).addClass('item-selected')

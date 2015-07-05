@@ -30,6 +30,9 @@ module.exports = function() {
 	// cache to minimize the number of asynchronous requests for individual kits
 	this.kitCache = {};
 
+	// cache for entity types shared by all games
+	this.entityTypeCache = {};
+
 	this.cipher = crypto.createCipher('aes-256-cbc', AES_CIPHER_KEY);
 	this.decipher = crypto.createDecipher('aes-256-cbc', AES_CIPHER_KEY);
 

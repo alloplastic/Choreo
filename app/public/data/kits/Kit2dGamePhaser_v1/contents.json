@@ -8,5 +8,5 @@
 	"author": "alloplastic_id",
 	"license": "MPL20",
 	"SDKs": ["phaser"],
-	"entities": ["EPhaserSprite"]
+	"entityTypes": ["EPhaserSprite"]
 }

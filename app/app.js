@@ -48,5 +48,9 @@ if (options.cluster && cluster.isMaster) {
   
 } else {
   // Worker processes run locomotive
-  locomotive.cli.server(options.app || process.cwd(), options.address, options.port, options.env, options);  
+  try {
+    locomotive.cli.server(options.app || process.cwd(), options.address, options.port, options.env, options);
+  } catch (e) {
+      console.log('+++++ Script error ' + e.message + '\n\n' + e.stack);
+  }
 }

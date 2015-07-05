@@ -14,11 +14,13 @@
 			this.fileRoot = options.fileRoot || _c.fileRoot || '/';
 
 			this.gameData = {};
-			this.uiState = new ChoreoEditorModel();
+			this.uiStateModel = new ChoreoEditorModel();
+			this.uiState = this.uiStateModel.data;  // extra reference to aupport prettier _c.get() paths
 
 			// sub-components
 
 			this.scenePane = new ChoreoScenePane();
+			this.kitPane = new ChoreoKitPane();
 			this.codeEditor = new ChoreoCodeEditor();
 		};
 
@@ -26,6 +28,7 @@
 
 			// initialize subcomponents
 			this.scenePane.init();
+			this.kitPane.init();
 			this.codeEditor.init();
 
 			// - jQuery kruft -
@@ -155,7 +158,7 @@
 		ChoreoEditor.prototype.initEditorState = function(gameData) {
 
 			if (gameData != null) {
-				this.uiState.defaultsForGame(gameData);
+				this.uiStateModel.defaultsForGame(gameData);
 			}
 		};
 

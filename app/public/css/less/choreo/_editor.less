@@ -94,6 +94,7 @@
 	.kit-pane {
 		width: auto;
 		margin-left: @choreo-margin-width;
+		padding: .5em .5em .5em .5em;
 		.flex(30, 0, auto);
 		.display-flex;
 		.flex-flow(column);
@@ -212,6 +213,41 @@
 	.item-selected {
 		a {
 			background-color: @choreo-item-color-selected;
+		}
+	}
+
+	.entity-type-template {
+
+		display: inline-block;
+		margin: .5em .5em .5em .5em;
+		position: relative;
+		width: 6em;
+		height: 6em;
+		cursor: move;
+		font-size: @choreo-font-size-small;
+
+		div {
+
+			min-width: 6em;
+			min-height: 3em;
+
+			img {
+				display: block;
+				width: auto;
+				height: 3em;
+	//			max-width: 3em;
+	//			max-height: 3em;
+				margin: 0em auto 0em auto;
+				cursor: move;
+			}
+
+		}
+		span {
+			display: block;
+			width: 6em;
+			min-width: 6em;
+			margin: 0em 0em 0em 0em;
+			text-align: center;
 		}
 	}	
 }
