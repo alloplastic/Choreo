@@ -37,8 +37,10 @@
 	cursor: -moz-grab;
 }
 
-.cursor-drag {
-	cursor: move;
-	cursor: -webkit-grabbing;
-	cursor: -moz-grabbing;
+
+// TBD: not sure why this class gets preempted by 'cursor-grab' during a drag
+.cursor-drag {	
+	cursor: move !important;
+	cursor: -webkit-grabbing !important;
+	cursor: -moz-grabbing !important;
 }8

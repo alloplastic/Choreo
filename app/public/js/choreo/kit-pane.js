@@ -82,6 +82,7 @@ if (!ChoreoKitPane) {
 			return;			
 		}
 
+		for (var x=0; x<20; x++) {
 		for (i=0; i<kit.entityTypes.length; i++) {
 			var entityTypeId = kit.entityTypes[i];
 			if (entityTypeId == null || entityTypeId.length <= 0) continue;
@@ -95,8 +96,18 @@ if (!ChoreoKitPane) {
 			var $span = $newEntityType.find('span');
 			if (entityType.friendlyName != null) $span.html(entityType.friendlyName);  // set HTML to allow for <br/>
 			if (entityType.icon != null) $img.attr('src', entityType.icon);  // server provides complete url
+
+			$newEntityType.draggable({
+				helper: 'clone',
+				opacity: .6,
+				start: function(event, ui) { ui.helper.removeClass('cursor-grab').addClass('cursor-drag'); },
+				revert: 'invalid',
+				zIndex: 1000
+//				stack: '.entity-type-template'
+			});
 			$kitPaneContent.append($newEntityType);
 		}
+}
 
 	};
 
