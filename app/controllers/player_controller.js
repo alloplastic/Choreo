@@ -27,7 +27,8 @@ var i18n = require('../../config/extensions/i18n-namespace');
 		model.apiRoot = this.app.apiRoot;
 		model.fileRoot = this.app.fileRoot;
 		model.gameAssetRoot = this.app.fileRoot + 'data/games/';  // individual players append gameId + '/assets/'
-
+		model.hostEnvironment = this.app.hostEnvironment;
+		
 		console.log('U = ' + model.uniqueName);
 
 		this.render('./choreo/player', model);

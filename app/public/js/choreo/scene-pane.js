@@ -15,8 +15,8 @@ if (!ChoreoScenePane) {
 		// this.gameState = {};
 
 		// hack to deal with jQuery UI widgets not sizing nicely inside flexbox layout;
-		var self = this;
-		setInterval(function() { self.onTweakSize(); }, 1000);
+		// var self = this;
+		// setInterval(function() { self.onTweakSize(); }, 1000);
 
 	};
 
@@ -144,7 +144,7 @@ if (!ChoreoScenePane) {
 				}
 			}
 
-			for (var x=0; x<2; x++) {
+			for (var x=0; x<4; x++) {
 			// add the button for creating a new layer
 			var finalLayerItem = $layerItemTemplate.clone().removeClass('template');
 
@@ -220,30 +220,30 @@ if (!ChoreoScenePane) {
 		}
 	};
 
-	ChoreoScenePane.prototype.onTweakSize = function() {
+// 	ChoreoScenePane.prototype.onTweakSize = function() {
 
-		return;
-		var curLayer = _c.get(_c.editor, 'uiState/data/currentLayer');
+// 		var curLayer = _c.get(_c.editor, 'uiState/data/currentLayer');
 
-		if (curLayer < 0) return;
+// 		if (curLayer < 0) return;
 
-		var $layersPane = $(".layers-pane");
-		var $layersPaneTabs = $(".layers-pane-tabs");
-		var $tabNav = $(".layers-pane-tabs > .ui-tabs-nav");
-		var $tabContent = $("#layers-pane-tab-" + curLayer);
-//		var $tabContent = $(".layers-pane-tabs > .tab-content-template");
+// 		var $layersPane = $(".layers-pane");
+// 		var $layersPaneTabs = $(".layers-pane-tabs");
+// 		var $tabNav = $(".layers-pane-tabs > .ui-tabs-nav");
+// 		var $tabContent = $("#layers-pane-tab-" + curLayer);
+// //		var $tabContent = $(".layers-pane-tabs > .tab-content-template");
 
-		var heightOfParent = $layersPaneTabs.height();
-		var heightOfHeader = $tabNav.height();
-		var heightOfContent = $tabContent.height();
-		var totalHeight = heightOfHeader + heightOfContent + 13;
+// 		var heightOfParent = $layersPaneTabs.height();
+// 		var heightOfHeader = $tabNav.height();
+// 		var heightOfContent = $tabContent.height();
+// 		var totalHeight = heightOfHeader + heightOfContent + 13;
 
-		var remainingHeight = heightOfParent - heightOfHeader;
+// 		var remainingHeight = heightOfParent - heightOfHeader;
 
-		//$layersPane.height(totalHeight).css({ "max-height": totalHeight + 'px' });
-//		$tabContent.height(remainingHeight).css({ "max-height": remainingHeight + 'px' });
-		$tabContent.css({ "max-height": remainingHeight + 'px' });
+// 		//$layersPane.height(totalHeight).css({ "max-height": totalHeight + 'px' });
+// //		$tabContent.height(remainingHeight).css({ "max-height": remainingHeight + 'px' });
+// 		$tabContent.css({ "max-height": remainingHeight + 'px' });
 
-		console.log('set height to ' + totalHeight);
-	}
+// 		console.log('set height to ' + totalHeight);
+// 	};
+
 }

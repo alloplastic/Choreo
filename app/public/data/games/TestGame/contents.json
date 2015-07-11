@@ -8,7 +8,9 @@
 		"name": "One",
 		"kits": ["Kit2dGamePhaser_v1"],
 		"entities": [{
-			"id": "Logo",
+			"id": "1",
+			"friendlyName": "Logo",
+			"icon": "0.png",
 			"type": "EPhaserSprite",
 			"images": ["phaser.png"],
 			"spritesheet": "",

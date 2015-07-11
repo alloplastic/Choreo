@@ -3,5 +3,14 @@
 	"friendlyName": "Phaser<br/>Sprite",
 	"icon": "icon.svg",
 	"editors": ["blocks", "image", "spritesheet"],
-	"block-sets": ["standard", "phaser"]
+	"block-sets": ["standard", "phaser"],
+	"defaultEntity": {
+			"id": "1",
+			"friendlyName": "Sprite",
+			"icon": "0.png",
+			"type": "EPhaserSprite",
+			"images": [],
+			"spritesheet": "",
+			"animations": []
+		}
 }

@@ -23,5 +23,12 @@
 	"One": "One",
 	"- 0 -": "- 0 -",
 	"- 1 -": "- 1 -",
-	"Add a new layer...": "Add a new layer..."
+	"Add a new layer...": "Add a new layer...",
+	"Save As": "Save As",
+	"Open": "Open",
+	"Export to File": "Export to File",
+	"Publish to Desktop": "Publish to Desktop",
+	"Publish to Mobile": "Publish to Mobile",
+	"Export to ZIP": "Export to ZIP",
+	"Import from ZIP": "Import from ZIP"
 }

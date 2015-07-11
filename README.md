@@ -55,3 +55,26 @@ grunt watch
 ```
 Auto-recompiles LESS files when they change.
 
+## Building Native App
+
+```
+grunt nodewebkit
+```
+
+See nodewebkit and grunt-nodewebkit for configuration options.
+
+To overcome file-descriptor limits on MacOS, see the following post:
+
+http://superuser.com/questions/302754/increase-the-maximum-number-of-open-file-descriptors-in-snow-leopard
+
+ulimit only changes the resource limits for the current shell and its children; sudo ulimit creates a root shell, adjusts its limits, and then exits (thus having, as far as I can see, no real effect). To exceed 12288, you need to adjust the kernel's kern.maxfiles and kern.maxfilesperproc parameters, and also (at least according to this blog entry, which is a summary of this discussion) a launchd limit. You can use launchctl limit to adjust all of these at once:
+
+sudo launchctl limit maxfiles 1000000 1000000
+To make this permanent (i.e not reset when you reboot), create /etc/launchd.conf containing:
+
+limit maxfiles 1000000 1000000
+Then you can use ulimit (but without the sudo) to adjust your process limit.
+
+BTW, if this doesn't do it, you may be running into size limits in the kernel. If your model supports it, booting the kernel in 64-bit mode may help.
+
+

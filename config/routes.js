@@ -4,6 +4,7 @@
 //
 // See (http://locomotivejs.org/guide/routing.html)
 //
+// The philosophy here is to build APIs that directly do what they say
 
 module.exports = function routes() {
 
@@ -35,6 +36,17 @@ module.exports = function routes() {
 
 	// mostly aimed at delivering a game to an iframe embed tag on an external site
 	this.match('player/:gameId', { controller: 'player', action: 'renderGame' });
+
+	// file-system based routes for clients using data from an external folder
+	this.match('api/v1/files/:path', { controller: 'files', action: 'getFile' });
+//	this.match('api/v1/files/game/:game', { controller: 'files', action: 'getFile' });
+
+	// needed? :
+	// this.match('files/js/:path', { controller: 'stubAPI', action: 'getJSFile' });
+	// this.match('files/json/:path', { controller: 'stubAPI', action: 'getJSONFile' });
+	// this.match('files/asset/:path', { controller: 'stubAPI', action: 'getAssetFile' });
+
+	this.match('player/file/:path', { controller: 'player', action: 'renderGameFromFile' });
 
 	this.namespace('choreo', function() {
 

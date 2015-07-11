@@ -30,6 +30,17 @@ var i18n = require('../../config/extensions/i18n-namespace');
 		model.fileRoot = this.app.fileRoot;
 		model.gameAssetRoot = this.app.fileRoot + 'data/games/';
 
+		var envHint;
+		if (this.param) {
+			envHint = this.param('env');	
+		} 
+
+		if (envHint) {
+			model.hostEnvironment = envHint;
+		} else {
+			model.hostEnvironment = this.app.hostEnvironment;  // default env=='web'
+		}
+
 		this.render('./index', model);
 	};	
 

@@ -160,7 +160,9 @@ ParentController.__processPage = function() {
 	ParentController.__request = function(requestObj) {
  
 		var deferred = Q.defer();
-		
+
+		deferred.promise.timeout(30000, "ERROR - ParentController.__request() - " + requestObj.url + " timed out after 30000 ms.");
+
 		request(requestObj, function(err, res, body) {
 
 			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
@@ -184,6 +186,8 @@ ParentController.__processPage = function() {
  
 		var deferred = Q.defer();
 		
+		deferred.promise.timeout(30000, "ERROR - ParentController.__requestRaw() - " + requestObj.url + " timed out after 30000 ms.");
+
 		request(requestObj, function(err, res, body) {
 
 			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";

@@ -20,16 +20,34 @@
 
 			this.scenePane = new ChoreoScenePane();
 			this.kitPane = new ChoreoKitPane();
+			this.galleryPane = new ChoreoGalleryPane();
 			this.codeEditor = new ChoreoCodeEditor();
+
+			this.directoryOpenDialog = null;
 		};
 
 		ChoreoEditor.prototype.init = function() {
 
+			var self=this;
+
 			// initialize subcomponents
 			this.scenePane.init();
 			this.kitPane.init();
+			this.galleryPane.init();
 			this.codeEditor.init();
 
+			// UI variants based on the host platform.  UI can't be completely agnostic to this, right?
+
+			if (_c.hostEnvironment == "desktop") {
+				$('#menu_file_open_from_web').hide();
+				$('#menu_file_export_to_zip').hide();
+				$('#menu_file_import_from_zip').hide();
+			} else if (_c.hostEnvironment == "web") {
+				$('#menu_file_open').hide();
+				$('#menu_file_save').hide();
+				$('#menu_file_save_as').hide();
+			}
+			
 			// - jQuery kruft -
 
 			// menu management
@@ -51,14 +69,27 @@
 							case "menu_file_save":
 								console.log("SAVE");
 								break;
-							case "menu_file_load":
+							case "menu_file_save_as":
+								self.selectSaveLocation.apply(self);
+								break;
+							case "menu_file_open":
 								console.log("LOAD");
+								self.selectDirectory.apply(self);
 								break;
-							case "menu_file_export_to_desktop":
-								console.log("EXPORT TO DESKTOP");
+							case "menu_file_open_from_web":
+								console.log("OPEN FROM WEB");
 								break;
-							case "menu_file_export_to_mobile":
-								console.log("EXPORT TO MOBILE");
+							case "menu_file_export_to_zip":
+								console.log("EXPORT TO ZIP");
+								break;
+							case "menu_file_import_from_zip":
+								console.log("IMPORT FROM ZIP");
+								break;
+							case "menu_file_publish_to_desktop":
+								console.log("PUBLISH TO DESKTOP");
+								break;
+							case "menu_file_publish_to_mobile":
+								console.log("PUBLISH TO MOBILE");
 								break;
 						}
 					}
@@ -113,6 +144,23 @@
 					menu.show();
 			});
 
+			this.directoryOpenDialog = $('#directoryOpenDialog');
+			this.directoryOpenDialog.change(function(evt) {
+
+				var newDirectory = $(this).val();
+				if (newDirectory && newDirectory.length > 0) {
+					self.openFromFile.apply(self, [newDirectory]);
+				}
+			});
+
+			this.saveAsDialog = $('#saveAsDialog');
+			this.saveAsDialog.change(function(evt) {
+				var saveDirectory = $(this).val();
+				if (saveDirectory && saveDirectory.length > 0) {
+					self.saveAs.apply(self, [saveDirectory]);
+				}
+			});
+
 			// some jQuery helpers
 
 			$.fn.inlineEdit = function(replaceWith, connectWith) {
@@ -161,21 +209,40 @@
 			}
 		};
 
+		ChoreoEditor.prototype.selectDirectory = function() {
+    		this.directoryOpenDialog.trigger('click');  
+		};
+
+		ChoreoEditor.prototype.selectSaveLocation = function() {
+    		this.saveAsDialog.trigger('click');  
+		};
+
+		ChoreoEditor.prototype.openFromFile = function(path) {
+
+			_c.set(self.uiState, 'data/currentProject', path);
+
+			// TBD: perform service call to read data from path/contents.json.
+
+			// then make this call:
+
+			//self.setNewGameData.apply(self, data);
+
+		};
+
+		ChoreoEditor.prototype.saveAs = function(path) {
+
+			// TBD
+
+		};
+
+		// TBD: rename to "openFromWeb"
 		ChoreoEditor.prototype.loadGame = function(id) {
 
 			var self = this;
 
 			$.getJSON( this.apiRoot + "games/" + id, function(data) {
 				if (data != null && data.status != 'error') {
-
-					// Though observers won't be propagated until after all JS in a given timestep finishes, we still
-					// need to be particular about the order of operations when updating the data, since we also want some
-					// code to respond to minor changes to UI state later.  So, the most logical sequence of actions is
-					// (1) tear down the old player and get a new one loading the new data, (2) replace the editor's
-					// gameData, triggering UI refreshes, and (3) recalculate the UI state now that we have new data.
-					_c.set(self, "gameData", data);
-					self.runGame(data);  // launch a player with the new data
-					self.initEditorState(data);  // recalculate this.uiState
+					self.setNewGameData.apply(self, [data]);
 				}
 			});
 
@@ -198,6 +265,19 @@
 			// });
 
 		};
+
+		ChoreoEditor.prototype.setNewGameData = function(data) {
+
+			// Though observers won't be propagated until after all JS in a given timestep finishes, we still
+			// need to be particular about the order of operations when updating the data, since we also want some
+			// code to respond to minor changes to UI state later.  So, the most logical sequence of actions is
+			// (1) tear down the old player and get a new one loading the new data, (2) replace the editor's
+			// gameData, triggering UI refreshes, and (3) recalculate the UI state now that we have new data.
+			_c.set(this, "gameData", data);
+			this.runGame(data);  // launch a player with the new data
+			this.initEditorState(data);  // recalculate this.uiState
+		};
+
 
 		ChoreoEditor.prototype.runGame = function(gameData) {
 			

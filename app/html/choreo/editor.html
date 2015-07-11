@@ -12,7 +12,7 @@
 
 		<div class="left-column">
 
-		<!-- 	<div class="layers-pane"> -->
+<!-- 			<div class="layers-pane"> -->
 
 				<div class="horizontal-margin"></div>
 
@@ -33,7 +33,7 @@
 					</div>
 				</div>
 
-			<!-- </div> -->
+<!-- 			</div> -->
 			
 			<div class="kit-pane">
 				<div class="horizontal-margin"></div>
@@ -93,12 +93,20 @@
 
 	</div>
 
+	<!-- some of these options are hidden at initialization time, depending on the context in which the app is running -->
 	<ul class="file-menu">
 		<li id="menu_file_new">{{#__}}choreo__New{{/__}}</li>
 		<li id="menu_file_save">{{#__}}choreo__Save{{/__}}</li>
-		<li id="menu_file_load">{{#__}}choreo__Load{{/__}}</li>
-		<li id="menu_file_export_to_desktop">{{#__}}choreo__Export to Desktop{{/__}}</li>
-		<li id="menu_file_export_to_mobile">{{#__}}choreo__Export to Mobile{{/__}}</li>
+		<li id="menu_file_save_as">{{#__}}choreo__Save As{{/__}}</li>
+		<li id="menu_file_open">{{#__}}choreo__Open{{/__}}</li>
+		<li id="menu_file_open_from_web">{{#__}}choreo__Open{{/__}}</li>
+		<li id="menu_file_export_to_zip">{{#__}}choreo__Export to ZIP{{/__}}</li>
+		<li id="menu_file_import_from_zip">{{#__}}choreo__Import from ZIP{{/__}}</li>
+		<li id="menu_file_publish_to_desktop">{{#__}}choreo__Publish to Desktop{{/__}}</li>
+		<li id="menu_file_publish_to_mobile">{{#__}}choreo__Publish to Mobile{{/__}}</li>
+		<!-- TBD: for mobile, we'll likely need additional options for "save to device," "save to service",
+		"share as zip; 
+		etc. -->
 	</ul>
 
 	<ul class="language-menu">
@@ -129,6 +137,8 @@
 	<span>Howdy<br/>Doody</span>
 </div>
 
+<input style="display:none;" id="directoryOpenDialog" type="file" webkitdirectory />
+<input style="display:none;" id="saveAsDialog" type="file" nwsaveas />
 
 <!--	
 	<div class="page-container">
@@ -143,5 +153,6 @@
 -->
 <script src="/js/choreo/scene-pane.js"></script>
 <script src="/js/choreo/kit-pane.js"></script>
+<script src="/js/choreo/gallery-pane.js"></script>
 <script src="/js/choreo/editor_model.js"></script>
 <script src="/js/choreo/editor.js"></script>

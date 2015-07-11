@@ -5,9 +5,30 @@
 <html lang="{{language}}">
 	<head>
 	    <script>
+
+//	    	setTimeout(function () {
+
+				var ngui = require('nw.gui');
+				if (ngui) {
+					var nwin = ngui.Window.get();
+					if (nwin) {
+						//nwin.resizeTo(1024, 768);
+						nwin.resizeTo(screen.height - 150, screen.midth-150);
+						nwin.moveTo(75, 75);
+						//nwin.enterFullscreen();
+						nwin.showDevTools();
+					}
+				}
+
+
+//	    	}, 5000);
+
+			// kinda kludgey, maybe, but we use the URL to inform node, and then the client, that we're
+			// 
 	        function bodyOnLoad(){
-	            window.location.assign('http://localhost:3000/');
+	            window.location.assign('http://localhost:3000?env=desktop');
 	        }
+
 	    </script>
 	</head>
 	<body onload="bodyOnLoad()">

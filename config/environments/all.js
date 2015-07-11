@@ -4,8 +4,16 @@ var express = require('express')
 ,	viewLocale = require('../extensions/view-locale')
 ,	crypto = require('crypto')
 ,	i18n = require('../extensions/i18n-namespace'),
-	oembed = require('connect-oembed');
+	oembed = require('connect-oembed'),
 	Q = require('q');
+
+
+	// var nwGui = null;
+	// try {
+	// 	nwGui = require('nw.gui');
+	// } catch(e) {
+	// }
+
 //	http = require('http');
 
 //http.globalAgent.maxSockets = 10;
@@ -26,7 +34,8 @@ module.exports = function() {
 
 	this.apiRoot = "/stubAPI/";
 	this.fileRoot = "/";
-	
+	this.hostEnvironment = "web";
+
 	// cache to minimize the number of asynchronous requests for individual kits
 	this.kitCache = {};
 

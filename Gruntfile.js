@@ -88,11 +88,24 @@ module.exports = function (grunt) {
 			}
 		},
 
-	 	nodewebkit: {
+		nodewebkit: {
 			options: {
-				platforms: [platform],
+				platforms: ["osx64"],
 				buildDir: '../builds/choreo-editor/webkitbuilds', // Where the build version of my node-webkit app is saved
-				version: 'v0.12.0'
+				version: 'v0.12.0',
+				"node-main": "app/nwboot.js",
+				"window": {
+					"frame": true,
+					"toolbar": true
+				},
+				"platformOverrides": {
+					"win": {
+						"window": {
+							"frame": true
+						}
+					}
+				}
+			
 			},
 			src: ['./**/*']
 		},

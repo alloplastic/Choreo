@@ -19,6 +19,7 @@ if (!ChoreoEditorModel) {
 			// flat structure since each panel only displays one "current" thing at a time
 			this.data = {
 				choreoVersion: 1,
+				currentProject: "",   // file or REST path to the currently loaded project
 				currentScene: "",
 				currentSceneIndex: 0,
 				currentLayer: 0,

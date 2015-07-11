@@ -7,6 +7,7 @@ var HomeModel = function HomeModelConstructor() {
 	this.apiRoot = "/";
 	this.fileRoot = "/";
 	this.gameAssetRoot = "/";
+	this.hostEnvironment = "desktop";
 };
 
 //Expose
