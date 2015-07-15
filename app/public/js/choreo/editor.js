@@ -44,11 +44,36 @@
 				$('#menu_file_import_from_zip').hide();
 			} else if (_c.hostEnvironment == "web") {
 				$('#menu_file_open').hide();
-				$('#menu_file_save').hide();
-				$('#menu_file_save_as').hide();
+//				$('#menu_file_save').hide();
+//				$('#menu_file_save_as').hide();
 			}
 			
 			// - jQuery kruft -
+
+			// simple boot menu (two buttons)
+
+			$(".create-new-button")
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+					event.stopPropagation();
+					if (self.uiState.data.modalState == "None") {
+						_c.set(self.uiState, 'data/modalState', "SaveAs");  // "New Project" = save pre-loaded empty game to a folder
+						self.selectSaveLocation.apply(self);									
+					}
+			});
+
+			$(".load-existing-button")
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+					event.stopPropagation();
+					if (self.uiState.data.modalState == "None") {
+						_c.set(self.uiState, 'data/modalState', "Open");
+						self.selectDirectory.apply(self);
+					}
+			});
+
 
 			// menu management
 
@@ -66,12 +91,20 @@
 							case "menu_file_new":
 								_c.editor.handleFileNew();
 								break;
-							case "menu_file_save":
-								console.log("SAVE");
-								break;
-							case "menu_file_save_as":
-								self.selectSaveLocation.apply(self);
-								break;
+							// case "menu_file_save":
+							// 	if (self.uiState.data.currentProject != "") {
+							// 		console.log("SAVE " + self.uiState.data.currentProject);
+							// 	} else {
+							// 		_c.set(self.uiState, 'data/modalState', "SaveAs");
+							// 		self.selectSaveLocation.apply(self);									
+							// 	}
+							// 	break;
+							// case "menu_file_save_as":
+							// 	if (self.uiState.data.modalState == "None") {
+							// 		_c.set(self.uiState, 'data/modalState', "SaveAs");
+							// 		self.selectSaveLocation.apply(self);
+							// 	}
+							// 	break;
 							case "menu_file_open":
 								console.log("LOAD");
 								self.selectDirectory.apply(self);
@@ -219,7 +252,11 @@
 
 		ChoreoEditor.prototype.openFromFile = function(path) {
 
-			_c.set(self.uiState, 'data/currentProject', path);
+			console.log("Opening from file...");
+
+			_c.set(this.uiState, 'data/currentProject', path);
+
+			_c.set(this.uiState, 'data/modalState', "None");
 
 			// TBD: perform service call to read data from path/contents.json.
 
@@ -232,6 +269,11 @@
 		ChoreoEditor.prototype.saveAs = function(path) {
 
 			// TBD
+
+			console.log("Saving As...");
+
+			_c.set(this.uiState, 'data/modalState', "None");
+
 
 		};
 

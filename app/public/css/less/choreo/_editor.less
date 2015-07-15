@@ -13,6 +13,41 @@
 		.flex-flow(column);
 	}
 
+	// idea is to always use a scrim to fill 100%, 100%;  Create middle and right column scrims if we
+	// constrain the flow of the user at the beginning.
+
+	.scrim {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background-color: #000000;
+		opacity: .6;
+		z-index: 1000;
+	}
+
+	.boot-screen {
+
+		width: 25em;
+		margin-left: auto;
+		margin-right: auto;
+
+		z-index: 1005;
+
+		& > div {
+			position: absolute;
+			width: 25em;
+			top: 50%;
+			height: 4em;
+			margin-top: -2em;
+			vertical-align: middle;
+
+			& > button {
+				margin: 0em auto 2em auto;
+				width: 25em;
+			}
+		}
+	}
+
 	// first undo width/height 100% from html & body -- needed, it seems, to give the editor
 	// a full-screen layout.
 
@@ -146,7 +181,7 @@
 
 	.workspace-info-pane {
 		.flex(0, 1, 3em);
-	 	background-color: #999900;
+		background-color: #999900;
 	}
 
 	.workspace-pane-content {
@@ -182,7 +217,7 @@
 
 	.properties-info-pane {
 		.flex(0, 1, 3em);
-	 	background-color: #999900;
+		background-color: #999900;
 	}
 
 	.properties-pane-content {

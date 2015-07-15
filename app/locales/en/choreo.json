@@ -30,5 +30,9 @@
 	"Publish to Desktop": "Publish to Desktop",
 	"Publish to Mobile": "Publish to Mobile",
 	"Export to ZIP": "Export to ZIP",
-	"Import from ZIP": "Import from ZIP"
+	"Import from ZIP": "Import from ZIP",
+	"Create_New_Project_Folder": "Create_New_Project_Folder",
+	"Open_Existing_Project_Folder": "Open_Existing_Project_Folder",
+	"Create New Project Folder": "Create New Project Folder",
+	"Open Existing Project Folder": "Open Existing Project Folder"
 }
