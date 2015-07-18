@@ -3,8 +3,9 @@
  * 
  */
 
-var PlayerController = new (require('locomotive').Controller)();
+//var PlayerController = new (require('locomotive').Controller)();
 var ParentController = require('./../controller.js');
+var PlayerController = new ParentController();
 var PlayerModel = require('../models/choreo/player_model');
 
 var i18n = require('../../config/extensions/i18n-namespace');
@@ -29,11 +30,10 @@ var i18n = require('../../config/extensions/i18n-namespace');
 		model.gameAssetRoot = this.app.fileRoot + 'data/games/';  // individual players append gameId + '/assets/'
 		model.hostEnvironment = this.app.hostEnvironment;
 		
-		console.log('U = ' + model.uniqueName);
-
 		this.render('./choreo/player', model);
 	};	
 
-	ParentController.parentOf(PlayerController);
+	//ParentController.parentOf(PlayerController);
+	PlayerController.parentOf(PlayerController);
 
 module.exports = PlayerController;

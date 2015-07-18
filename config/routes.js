@@ -38,7 +38,9 @@ module.exports = function routes() {
 	this.match('player/:gameId', { controller: 'player', action: 'renderGame' });
 
 	// file-system based routes for clients using data from an external folder
+	this.match('api/v1/files/newGame/:path', { controller: 'files', action: 'newGame' });
 	this.match('api/v1/files/:path', { controller: 'files', action: 'getFile' });
+
 //	this.match('api/v1/files/game/:game', { controller: 'files', action: 'getFile' });
 
 	// needed? :

@@ -4,8 +4,9 @@
  * Build out this controller to create a web app around the choreo editor.
  */
 
-var DefaultController = new (require('locomotive').Controller)();
+//var DefaultController = new (require('locomotive').Controller)();
 var ParentController = require('./../controller.js');
+var DefaultController = new ParentController();
 var HomeModel = require('../models/choreo/home_model');
 var PlayerModel = require('../models/choreo/player_model');
 var i18n = require('../../config/extensions/i18n-namespace');
@@ -15,7 +16,8 @@ var i18n = require('../../config/extensions/i18n-namespace');
 	 */
 	DefaultController.main = function() {
 
-		ParentController.__addNoCacheHeaders.call(this);
+		this.__addNoCacheHeaders.call(this);
+//		ParentController.__addNoCacheHeaders.call(this);
 		this.page = false;
 
 		var model = new HomeModel();
@@ -67,7 +69,8 @@ var i18n = require('../../config/extensions/i18n-namespace');
 	 * First extend ParentController before and after. This can instantiate properties like this.user,
 	 * this.loggedIn, this.language, etc.
 	 */
-	ParentController.parentOf(DefaultController);
+	//ParentController.parentOf(DefaultController);
+	DefaultController.parentOf(DefaultController);
 		
 
 	DefaultController.before(['show','main'], function(next) {

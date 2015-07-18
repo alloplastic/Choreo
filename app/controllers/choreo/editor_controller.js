@@ -3,10 +3,12 @@
  * 
  */
 
-var EditorController = new (require('locomotive').Controller)()
-,	ParentController = require('./../../controller.js')
-,	i18n = require('../../../config/extensions/i18n-namespace');
+//var EditorController = new (require('locomotive').Controller)();
+var ParentController = require('./../../controller.js');
+var EditorController = new ParentController();
+
+var i18n = require('../../../config/extensions/i18n-namespace');
 	
-	ParentController.parentOf(EditorController);
+	EditorController.parentOf(EditorController);
 
 module.exports = EditorController;
