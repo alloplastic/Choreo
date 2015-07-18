@@ -39,11 +39,18 @@
 			// UI variants based on the host platform.  UI can't be completely agnostic to this, right?
 
 			if (_c.hostEnvironment == "desktop") {
+
 				$('#menu_file_open_from_web').hide();
 				$('#menu_file_export_to_zip').hide();
 				$('#menu_file_import_from_zip').hide();
+
 			} else if (_c.hostEnvironment == "web") {
+
 				$('#menu_file_open').hide();
+
+				$('.boot-screen').hide();
+				$('.scrim.full').hide();
+
 //				$('#menu_file_save').hide();
 //				$('#menu_file_save_as').hide();
 			}
@@ -107,7 +114,10 @@
 							// 	break;
 							case "menu_file_open":
 								console.log("LOAD");
-								self.selectDirectory.apply(self);
+								if (self.uiState.data.modalState == "None") {
+									_c.set(self.uiState, 'data/modalState', "Open");
+									self.selectDirectory.apply(self);
+								}
 								break;
 							case "menu_file_open_from_web":
 								console.log("OPEN FROM WEB");
@@ -250,13 +260,36 @@
     		this.saveAsDialog.trigger('click');  
 		};
 
+		/** Loads a game from a file on the local disk.  Current assumption is that this
+		 * function is only called in Desktop mode.  A corollary to that is that apiRoot
+		 * shoiuld be "api/v1" or the like.
+		 *
+		 * @Method
+		 */
 		ChoreoEditor.prototype.openFromFile = function(path) {
 
-			console.log("Opening from file...");
+			// @@@
+			var self = this;
+
+			console.log("Opening from file: " + path);
 
 			_c.set(this.uiState, 'data/currentProject', path);
 
 			_c.set(this.uiState, 'data/modalState', "None");
+
+			$.getJSON( this.apiRoot + "files?path=" + encodeURIComponent(path), function(data) {
+				if (data != null && data.status != 'error') {
+
+					// don't need the scrim anymore
+					$('.boot-screen').hide();
+					$('.scrim.full').hide();
+
+					self.setNewGameData.apply(self, [data]);
+				}
+				else {
+					alert ("Sorry, something went wrong:\n\n" + data.message);
+				}
+			});
 
 			// TBD: perform service call to read data from path/contents.json.
 

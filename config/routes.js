@@ -38,8 +38,12 @@ module.exports = function routes() {
 	this.match('player/:gameId', { controller: 'player', action: 'renderGame' });
 
 	// file-system based routes for clients using data from an external folder
-	this.match('api/v1/files/newGame/:path', { controller: 'files', action: 'newGame' });
-	this.match('api/v1/files/:path', { controller: 'files', action: 'getFile' });
+	this.match('api/v1/files/newGame', { controller: 'files', action: 'newGame' });
+	this.match('api/v1/files', { controller: 'files', action: 'getFile' });
+
+	// adding these stub routes, too, since even during offline testing we want to access the local disk
+	this.match('stubAPI/files', { controller: 'files', action: 'getFile' });
+	this.match('stubAPI/files/newGame', { controller: 'files', action: 'getFile' });
 
 //	this.match('api/v1/files/game/:game', { controller: 'files', action: 'getFile' });
 
@@ -48,7 +52,7 @@ module.exports = function routes() {
 	// this.match('files/json/:path', { controller: 'stubAPI', action: 'getJSONFile' });
 	// this.match('files/asset/:path', { controller: 'stubAPI', action: 'getAssetFile' });
 
-	this.match('player/file/:path', { controller: 'player', action: 'renderGameFromFile' });
+	this.match('player/file', { controller: 'player', action: 'renderGameFromFile' });
 
 	this.namespace('choreo', function() {
 

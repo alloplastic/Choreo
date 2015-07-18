@@ -248,6 +248,8 @@ ParentController.prototype.__processPage = function() {
 		var k, kit, kitId, i, r, url;
 		var self = this;
 
+		var orb = "A = " + result + "," + result.scenes;
+
 		try {
 
 			if (result != null) {
@@ -256,10 +258,13 @@ ParentController.prototype.__processPage = function() {
 
 				var scenes = result.scenes;
 				if (scenes != null && scenes.length > 0) {
+					orb = "B";
 					for (i=0; i<scenes.length; i++) {
 						var scene = scenes[i];
+						orb = "C - " + scene;
 						if (scene != null && scene.kits != null && scene.kits.length > 0) {
 							var kits = scene.kits;
+							orb = "D - " + kits.length;
 							for (k=0; k<kits.length; k++) {
 								kitId = kits[k];  // this list contains the unique ids of kits
 //								if (kitId != null && ParentController.app.kitCache[kitId] == null && kitsNeeded.indexOf(kitId) == -1) {
@@ -292,6 +297,7 @@ ParentController.prototype.__processPage = function() {
 					
 				var promises = [];
 				for (k=0; k<kitsNeeded.length; k++) {
+					// TBD: branch here based on hostEnvironment=web to call into the database.
 					var url = "http://" + this.__req.headers.host + "/data/kits/" + kitsNeeded[k] + "/contents.json";
 					var p = this._requestJSON(url);
 //					var p = ParentController._requestJSON(url);
@@ -308,6 +314,7 @@ ParentController.prototype.__processPage = function() {
 						// TBD: might need to rethink this once binary files are stored on a separate server; but maybe
 						// the API remains the same
 						if (kit.icon != null && kit.icon.length>0 && kit.id != null && kit.id.length>0) {
+							// TBD: branch here based on hostEnvironment=web to call into the database.
 							url = "http://" + self.__req.headers.host + "/data/kits/" + kit.id + "/" + kit.icon;
 							kit.icon = url;
 						}
@@ -332,7 +339,7 @@ ParentController.prototype.__processPage = function() {
 
 		} catch (e) {
 			console.log("ERROR - getKitsForGame() - " + e.message);
-			resLocal.json({status: "error", message: e.message});
+			resLocal.json({status: "error", orb: orb, f: "getKitsForGame", message: e.message, data: result});
 		}
 
 
@@ -414,6 +421,7 @@ ParentController.prototype.__processPage = function() {
 
 			var promises = [];
 			for (i=0; i<entityTypesNeeded.length; i++) {
+				// TBD: branch here based on hostEnvironment=web to call into the database.
 				url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityTypesNeeded[i] + "/contents.json";
 				var p = this._requestJSON(url);
 				//var p = ParentController._requestJSON(url);
@@ -427,6 +435,7 @@ ParentController.prototype.__processPage = function() {
 				for (r=0; r<entityTypeResponses.length; r++) {
 					var entityType = entityTypeResponses[r];
 					if (entityType.icon != null && entityType.icon.length>0 && entityType.id != null && entityType.id.length>0) {
+						// TBD: branch here based on hostEnvironment=web to call into the database.
 						url = "http://" + self.__req.headers.host + "/data/entityTypes/" + entityType.id + "/" + entityType.icon;
 						entityType.icon = url;
 					}
@@ -443,7 +452,7 @@ ParentController.prototype.__processPage = function() {
 
 		} catch (e) {
 			console.log("ERROR - getEntityTypes() - " + e.message);
-			resLocal.json({status: "error", message: e.message});
+			resLocal.json({status: "error", message: e.message, data: result});
 		}
 
 		return true;  // let calling code know to let the above promise handle the response

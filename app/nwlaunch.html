@@ -12,11 +12,12 @@
 				if (ngui) {
 					var nwin = ngui.Window.get();
 					if (nwin) {
+						nwin.showDevTools();
 						//nwin.resizeTo(1024, 768);
-						nwin.resizeTo(screen.height - 150, screen.midth-150);
+						nwin.resizeTo(screen.height - 150, screen.midth - 150);
 						nwin.moveTo(75, 75);
 						//nwin.enterFullscreen();
-						nwin.showDevTools();
+						setTimeout(function() { nwin.showDevTools(); }, 5000);
 					}
 				}
 

@@ -144,7 +144,7 @@ if (!ChoreoScenePane) {
 				}
 			}
 
-			for (var x=0; x<4; x++) {
+			//for (var x=0; x<4; x++) {
 			// add the button for creating a new layer
 			var finalLayerItem = $layerItemTemplate.clone().removeClass('template');
 
@@ -154,7 +154,7 @@ if (!ChoreoScenePane) {
 			});
 
 			newTabContent.append(finalLayerItem);
-}
+//}
 
 			// highlight the selected layer
 
@@ -213,7 +213,7 @@ if (!ChoreoScenePane) {
 		}
 
 		if (curLayer >= 0) {
-			console.log("highlighting scene " + curLayer);
+			console.log("highlighting layer " + curLayer);
 			var a = $($a[curLayer]);
 			a.addClass('item-selected');
 //			$($a[curScene]).addClass('item-selected')

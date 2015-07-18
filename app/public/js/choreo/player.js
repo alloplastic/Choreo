@@ -212,8 +212,10 @@ if (!ChoreoPlayer) {
 
 		// TBD: identify "start" scripts and load only those into the running-scripts list
 		var scene = this._curSceneRef;
-		for (var i=0; i<scene.scripts.length; i++) {
-			this.runningScripts.push(new _c.RunningScript(scene.scripts[i]));
+		if (scene != null && scene.scripts != null) {
+			for (var i=0; i<scene.scripts.length; i++) {
+				this.runningScripts.push(new _c.RunningScript(scene.scripts[i]));
+			}
 		}
 
 		// start run loop

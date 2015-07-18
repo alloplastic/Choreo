@@ -4,7 +4,7 @@
  */
 
 var HomeModel = function HomeModelConstructor() {
-	this.apiRoot = "/";
+	this.apiRoot = "stubAPI/";   // desktop uses static data, which is equivalent to the "stub" API for the online app
 	this.fileRoot = "/";
 	this.gameAssetRoot = "/";
 	this.hostEnvironment = "desktop";
