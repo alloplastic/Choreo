@@ -1,10 +1,10 @@
 {
-	"id": "",
+	"id": "TBD_generate",
 	"choreoVersion": 1,
-	"name": "New Game",
-	"firstScene": "Scene0",
+	"name": "New Project",
+	"firstScene": "TBD_generate",
 	"scenes": [{
-		"id": "Scene0",
+		"id": "TBD_generate",
 		"name": "- 1 -",
 		"kits": [],
 		"entities": []

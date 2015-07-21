@@ -38,12 +38,17 @@ module.exports = function routes() {
 	this.match('player/:gameId', { controller: 'player', action: 'renderGame' });
 
 	// file-system based routes for clients using data from an external folder
-	this.match('api/v1/files/newGame', { controller: 'files', action: 'newGame' });
-	this.match('api/v1/files', { controller: 'files', action: 'getFile' });
+//	this.match('api/v1/files/newGame', { controller: 'files', action: 'newGame' });
+	this.match('api/v1/files', { controller: 'files', action: 'getFile', via: ['GET'] });
+	this.match('api/v1/files', { controller: 'files', action: 'putFile', via: ['POST', 'PUT'] });
+	this.match('api/v1/files/directory', { controller: 'files', action: 'createDirectory', via: ['POST', 'PUT'] });
 
 	// adding these stub routes, too, since even during offline testing we want to access the local disk
-	this.match('stubAPI/files', { controller: 'files', action: 'getFile' });
-	this.match('stubAPI/files/newGame', { controller: 'files', action: 'getFile' });
+	this.match('stubAPI/files', { controller: 'files', action: 'getFile', via: ['GET'] });
+	this.match('stubAPI/files', { controller: 'files', action: 'putFile', via: ['POST', 'PUT'] });
+	this.match('stubAPI/directory', { controller: 'files', action: 'createDirectory', via: ['POST', 'PUT'] });
+
+//	this.match('stubAPI/files/newGame', { controller: 'files', action: 'getFile' });
 
 //	this.match('api/v1/files/game/:game', { controller: 'files', action: 'getFile' });
 

@@ -65,7 +65,7 @@
 					event.preventDefault();
 					event.stopPropagation();
 					if (self.uiState.data.modalState == "None") {
-						_c.set(self.uiState, 'data/modalState', "SaveAs");  // "New Project" = save pre-loaded empty game to a folder
+						_c.set(self.uiState, 'data/modalState', "CreateNewProjectFolder");  // "New Project" = save pre-loaded empty game to a folder
 						self.selectSaveLocation.apply(self);									
 					}
 			});
@@ -96,7 +96,10 @@
 					if (event.toElement != null) {
 						switch(event.toElement.id) {
 							case "menu_file_new":
-								_c.editor.handleFileNew();
+								if (this.uiState.data.modalState == "None") {
+									_c.set(this.uiState, 'data/modalState', "CreateNewProjectFolder");  // "New Project" = save pre-loaded empty game to a folder
+									this.selectSaveLocation();									
+								}
 								break;
 							// case "menu_file_save":
 							// 	if (self.uiState.data.currentProject != "") {
@@ -200,7 +203,9 @@
 			this.saveAsDialog.change(function(evt) {
 				var saveDirectory = $(this).val();
 				if (saveDirectory && saveDirectory.length > 0) {
-					self.saveAs.apply(self, [saveDirectory]);
+					// currently, we use the dialog only to create a new project; in the future we can check
+					// 'uiState/data/modelState' to determine what action the user intends.
+					self.createNewProjectFolder.apply(self, [saveDirectory]);
 				}
 			});
 
@@ -253,11 +258,11 @@
 		};
 
 		ChoreoEditor.prototype.selectDirectory = function() {
-    		this.directoryOpenDialog.trigger('click');  
+			this.directoryOpenDialog.trigger('click');  
 		};
 
 		ChoreoEditor.prototype.selectSaveLocation = function() {
-    		this.saveAsDialog.trigger('click');  
+			this.saveAsDialog.trigger('click');  
 		};
 
 		/** Loads a game from a file on the local disk.  Current assumption is that this
@@ -268,7 +273,6 @@
 		 */
 		ChoreoEditor.prototype.openFromFile = function(path) {
 
-			// @@@
 			var self = this;
 
 			console.log("Opening from file: " + path);
@@ -299,11 +303,52 @@
 
 		};
 
-		ChoreoEditor.prototype.saveAs = function(path) {
+		/** Retrieves a representation of an "empty" game and saves it to a location specified by the user.
+		 *
+		 * @Method
+		 */
+		ChoreoEditor.prototype.createNewProjectFolder = function(path) {
 
-			// TBD
+			// NOTE: currently we use this routine only for saving out a blank/new game.  No Save As in the UI for now.
+
+			var self = this;
+
+			// We get the JSON of the default "empty game" from the server, then we tell the server to write this JSON
+			// to the location on disk chosen by the user.  Server creates the new directory if needed.
 
 			console.log("Saving As...");
+
+			// TBD: need different delim for Windows?
+
+			$.getJSON( this.apiRoot + "games/EmptyGame", function(data) {
+				if (data != null && data.status != 'error') {
+
+					var newGame = data;
+
+					// delete extra data aggregated by server
+					if (newGame._refs != null) delete newGame._refs;
+
+					 $.ajax(self.apiRoot + 'files?path=' + encodeURIComponent(path + '/') + '&fileName=contents.json', {
+						type: 'POST',
+						data: JSON.stringify(newGame),
+						contentType: 'application/json',
+						success: function(response) { 
+							// don't need the scrim anymore
+							$('.boot-screen').hide();
+							$('.scrim.full').hide();
+
+							self.setNewGameData.apply(self, [newGame]);
+						},
+						error  : function(err) {
+							alert ("Sorry, something went wrong:\n\n" + err.responseText);
+						}
+					});
+
+				}
+				else {
+					alert ("Sorry, something went wrong:\n\n" + data.message);
+				}
+			});
 
 			_c.set(this.uiState, 'data/modalState', "None");
 
@@ -404,10 +449,10 @@
 
 		};
 
-		ChoreoEditor.prototype.handleFileNew = function(gameData) {
-			console.log("Handling File New.");
-			this.loadGame("EmptyGame");
-		};
+		// ChoreoEditor.prototype.handleFileNew = function(gameData) {
+		// 	console.log("Handling File New.");
+		// 	this.loadGame("EmptyGame");
+		// };
 
 
 	}

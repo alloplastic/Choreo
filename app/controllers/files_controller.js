@@ -12,12 +12,10 @@ var i18n = require('../../config/extensions/i18n-namespace');
 var fs = require('fs');
 	 
 
-	 	/**
+	 /**
 	 * Retrieve a game by name, pulling from a directory of static JSON files
 	 */
 	FilesController.getFile = function() {
-
-		console.log("Ribbit");
 
 		try {
 			var path = this.param('path');
@@ -37,9 +35,39 @@ var fs = require('fs');
 			});
 				
 		} catch (e) {
-			console.log("ERROR - FileController - getGame() - " + e.message);
+			console.log("ERROR - FileController - getFile() - " + e.message);
 			resLocal.json({status: "error", message: e.message});
 		}
+	};
+
+	 /**
+	 * Retrieve a game by name, pulling from a directory of static JSON files
+	 */
+	FilesController.putFile = function() {
+
+		try {
+			var path = this.param('path');
+			var fileName = this.param('fileName');
+			var self = this;
+
+			// TBD: branch based on content-type header?  Need to worry about delims?
+			var contents = this.__req.body;
+
+			// TBD: evaluate whether sync functions will cause bottlenecks; probably not for this op
+			if (!fs.existsSync(path)) fs.mkdirSync(path);
+
+			var resLocal = this.__res;  // must bind variable directly to __res to maintain this pointer context
+
+			fs.writeFile(path + fileName, JSON.stringify(contents), function (err, result) {
+
+				if (err) throw err;
+				resLocal.json({status: "success"});
+			});
+				
+		} catch (e) {
+			resLocal.json({status: "error", message: e.message});
+		}
+
 	};
 
 	/**
