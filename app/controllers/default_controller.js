@@ -43,6 +43,9 @@ var i18n = require('../../config/extensions/i18n-namespace');
 			model.hostEnvironment = this.app.hostEnvironment;  // default env=='web'
 		}
 
+		// to temporarility test something in the browser
+		//model.hostEnvironment = "desktop";
+
 		this.render('./index', model);
 	};	
 

@@ -100,7 +100,11 @@ if (!ChoreoKitPane) {
 			$newEntityType.draggable({
 				helper: 'clone',
 				opacity: .6,
-				start: function(event, ui) { ui.helper.removeClass('cursor-grab').addClass('cursor-drag'); },
+				start: function(event, ui) { 
+					ui.helper.removeClass('cursor-grab').addClass('cursor-drag');
+					ui.helper._refs = {};  // TBD: should we feel ashamed for passing data this way?
+					ui.helper._refs.entityType = entityType;
+				},
 				revert: 'invalid',
 				zIndex: 1000
 //				stack: '.entity-type-template'

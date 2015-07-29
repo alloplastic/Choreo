@@ -1,19 +1,24 @@
 /**
- * StubController
+ * API Controller
  * 
- * Static stub date mirroring the real or envisioned services.
+ * a shell for building out the real web services for online access or an online version of the tool
+ * 
+ * TBD: who knows, maybe the /data routes used by the stub could operate equivalently online, but most likelu
+ * most of these endpoints will need to be rewritten with the cloud services in mind.
+ *
+ * TBD: refactor the stub code below.
  */
 
-//var StubAPIController = new (require('locomotive').Controller)();
+//var APIController = new (require('locomotive').Controller)();
 var ParentController = require('./../controller.js');
-var StubAPIController = new ParentController();
+var APIController = new ParentController();
 var i18n = require('../../config/extensions/i18n-namespace');
 var Q = require('q');
 
 	/**
 	 * Retrieve a game by name, pulling from a directory of static JSON files
 	 */
-	StubAPIController.getGame = function() {
+	APIController.getGame = function() {
 
 		try {
 			var gameId = this.param('gameId');
@@ -24,7 +29,7 @@ var Q = require('q');
 
 			var resLocal = this.__res;  // must bind variable directly to __res to maintain this pointer context
 
-			this._getJSON(url)
+			this._getJSON(url)			
 				
 				.then (
 				function(result) { // success
@@ -34,6 +39,8 @@ var Q = require('q');
 					resLocal.json({status: "error"});
 			});;
 
+			console.log("Urp.");
+
 		} catch (e) {
 			console.log("ERROR - getGame() - " + e.message);
 			resLocal.json({status: "error", message: e.message});
@@ -41,18 +48,18 @@ var Q = require('q');
 	};
 
 	/**
-	 * TBD: create a new game in the system and return the id.  A no-op for the stub, maybem but in the real API
+	 * TBD: create a new game in the system and return the id.  A no-op for the stub, maybe, but in the real API
 	 * this probably involves creating the S3 documents for the main content.json file, defualt entity icon; etc.,
 	 * and then linking these into a record in SimpleDB.
 	 */
-	StubAPIController.newGame = function() {
+	APIController.newGame = function() {
 
 	};
 
 	/**
 	 * Retrieve the .js file containing a game's class definitions
 	 */
-	StubAPIController.getGameClasses = function() {
+	APIController.getGameClasses = function() {
 
 		var gameId = this.param('gameId');
 
@@ -69,7 +76,7 @@ var Q = require('q');
 	/**
 	 * Retrieve the .js file containing a game's instance definitions
 	 */
-	StubAPIController.getGameInstances = function() {
+	APIController.getGameInstances = function() {
 
 		var gameId = this.param('gameId');
 
@@ -83,7 +90,7 @@ var Q = require('q');
 	/**
 	 * Retrieve the .js file containing a game's scripts
 	 */
-	StubAPIController.getGameScripts = function() {
+	APIController.getGameScripts = function() {
 
 		var gameId = this.param('gameId');
 
@@ -103,16 +110,16 @@ var Q = require('q');
 	 * First extend ParentController before and after. This can instantiate properties like this.user,
 	 * this.loggedIn, this.language, etc.
 	 */
-//	this.parentOf(StubAPIController);
-	//ParentController.parentOf(StubAPIController);
-	StubAPIController.parentOf(StubAPIController);
+//	this.parentOf(APIController);
+	//ParentController.parentOf(APIController);
+	APIController.parentOf(APIController);
 		
 
-	StubAPIController.before(['getGame'], function(next) {
+	APIController.before(['getGame'], function(next) {
 
 		// Add global logic for processing page logic, session info; etc.
 
 		next();
 	});
 		
-module.exports = StubAPIController;
+module.exports = APIController;

@@ -19,6 +19,12 @@ var Q = require('q');
 var request = require("request");
 
 
+
+	ParentController.prototype._error = function(res, message, info) {
+		console.log(message);
+		res.json({status: "error", message: message, info: info});
+	};
+
 	ParentController.prototype.beforeAll = function(next) {
 
 		// TBD: This is the place to check whether the current user is logged in and/or
@@ -184,8 +190,10 @@ ParentController.prototype.__processPage = function() {
 			var statusCode = (typeof res!=='undefined' && typeof res.statusCode !=='undefined') ? res.statusCode : "";
 
 			if (typeof body !== 'undefined' && !err) {
+				if (body == null || body.length < 1) body = {};
 				//Parse result into JSON
-				var result = JSON.parse(body);				
+				console.log("req:\n\n" + JSON.stringify(body));
+				var result = JSON.parse(body);	
 				deferred.resolve(result);
 			} else {
 				deferred.reject({status: "error"});
@@ -248,8 +256,6 @@ ParentController.prototype.__processPage = function() {
 		var k, kit, kitId, i, r, url;
 		var self = this;
 
-		var orb = "A = " + result + "," + result.scenes;
-
 		try {
 
 			if (result != null) {
@@ -258,13 +264,10 @@ ParentController.prototype.__processPage = function() {
 
 				var scenes = result.scenes;
 				if (scenes != null && scenes.length > 0) {
-					orb = "B";
 					for (i=0; i<scenes.length; i++) {
 						var scene = scenes[i];
-						orb = "C - " + scene;
 						if (scene != null && scene.kits != null && scene.kits.length > 0) {
 							var kits = scene.kits;
-							orb = "D - " + kits.length;
 							for (k=0; k<kits.length; k++) {
 								kitId = kits[k];  // this list contains the unique ids of kits
 //								if (kitId != null && ParentController.app.kitCache[kitId] == null && kitsNeeded.indexOf(kitId) == -1) {
@@ -299,8 +302,7 @@ ParentController.prototype.__processPage = function() {
 				for (k=0; k<kitsNeeded.length; k++) {
 					// TBD: branch here based on hostEnvironment=web to call into the database.
 					var url = "http://" + this.__req.headers.host + "/data/kits/" + kitsNeeded[k] + "/contents.json";
-					var p = this._requestJSON(url);
-//					var p = ParentController._requestJSON(url);
+					var p = this._getJSON(url);
 					p.timeout(30000, "ERROR - Kit request for " + kitsNeeded[k] + " timed out after 30000 ms.");
 					promises.push(p);
 				}
@@ -339,7 +341,7 @@ ParentController.prototype.__processPage = function() {
 
 		} catch (e) {
 			console.log("ERROR - getKitsForGame() - " + e.message);
-			resLocal.json({status: "error", orb: orb, f: "getKitsForGame", message: e.message, data: result});
+			resLocal.json({status: "error", f: "getKitsForGame", message: e.message, data: result});
 		}
 
 
@@ -423,8 +425,7 @@ ParentController.prototype.__processPage = function() {
 			for (i=0; i<entityTypesNeeded.length; i++) {
 				// TBD: branch here based on hostEnvironment=web to call into the database.
 				url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityTypesNeeded[i] + "/contents.json";
-				var p = this._requestJSON(url);
-				//var p = ParentController._requestJSON(url);
+				var p = this._getJSON(url);
 				p.timeout(30000, "ERROR - Entity Type request for " + entityTypesNeeded[i] + " timed out after 30000 ms.");
 				promises.push(p);								
 			}
@@ -507,27 +508,70 @@ ParentController.prototype.__processPage = function() {
 
 	};
 
-	// TBD: move to superclass?
+	// ParentController.prototype._getJSON = function(url) {
 
-	ParentController.prototype._requestJSON = function(url) {
+	// 	// construct a "request" object to pass to Request.js
+	// 	var requestObj = {
+	// 		uri: url,
+	// 		method: 'GET',
+	// 		body: "",
+	// 		headers: {"Content-Type": "application/x-www-form-urlencoded"}
+	// 	};
+
+	// 	var resLocal = this.__res;  // must bind variable directly to __res to maintain correct this pointer context
+
+	// 	// a promise-based call to the data stub URL
+	// 	this.__request(requestObj).
+	// 		then (
+	// 		function(result) { // success
+	// 			resLocal.json(result);
+	// 		},
+	// 		function(result) {   // failure
+	// 			resLocal.json({status: "error"});
+	// 	});
+
+	// };
+
+	ParentController.prototype._getJSON = function(url) {
 
 		// construct a "request" object to pass to Request.js
 		var requestObj = {
 			uri: url,
 			method: 'GET',
 			body: "",
+//			headers: {"Content-Type": "application/json"}
 			headers: {"Content-Type": "application/x-www-form-urlencoded"}
 		};
 
-		//var resLocal = this.__res;  // must bind variable directly to __res to maintain this pointer context
-
 		// a promise-based call to the data stub URL
 		return this.__request(requestObj);
-//		return ParentController.__request(requestObj);
 
 	};
 
-	ParentController.prototype._requestJS = function(url) {
+	ParentController.prototype._putJSON = function(url, content) {
+
+		try {
+		// construct a "request" object to pass to Request.js
+		var requestObj = {
+			uri: url,
+			method: 'PUT',
+//			json: true,
+//			body: content,
+			body: JSON.stringify(content),
+			headers: {"Content-Type": "application/json"}
+//			headers: {"Content-Type": "application/x-www-form-urlencoded"}
+		};
+
+		// a promise-based call to the data stub URL
+		return this.__request(requestObj);
+
+		} catch (e) {
+			resLocal.json({status: "error", message: e.message});
+		}
+
+	};
+
+	ParentController.prototype._getJS = function(url) {
 
 //		console.log("requesting js url = " + url.toString());
 
@@ -557,5 +601,20 @@ ParentController.prototype.__processPage = function() {
 		});
 
 	};
+
+	ParentController.prototype._getRaw = function(url) {
+
+		// construct a "request" object to pass to Request.js
+		var requestObj = {
+			uri: url,
+			method: 'GET',
+			body: "",
+			headers: {"Content-Type": "application/x-www-form-urlencoded"}
+		};
+
+		return this.__request(requestObj);
+
+	};
+
 	
 module.exports = ParentController;

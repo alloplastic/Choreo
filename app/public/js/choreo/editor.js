@@ -96,9 +96,9 @@
 					if (event.toElement != null) {
 						switch(event.toElement.id) {
 							case "menu_file_new":
-								if (this.uiState.data.modalState == "None") {
-									_c.set(this.uiState, 'data/modalState', "CreateNewProjectFolder");  // "New Project" = save pre-loaded empty game to a folder
-									this.selectSaveLocation();									
+								if (self.uiState.data.modalState == "None") {
+									_c.set(self.uiState, 'data/modalState', "CreateNewProjectFolder");  // "New Project" = save pre-loaded empty game to a folder
+									self.selectSaveLocation();									
 								}
 								break;
 							// case "menu_file_save":
@@ -124,6 +124,7 @@
 								break;
 							case "menu_file_open_from_web":
 								console.log("OPEN FROM WEB");
+								// temp test -- self.openFromFile.apply(self, ['/Users/sheldon/Documents/dev/Choreo/tests/G5']);
 								break;
 							case "menu_file_export_to_zip":
 								console.log("EXPORT TO ZIP");
@@ -160,8 +161,13 @@
 				select: function( event, ui ) {
 					$(this).hide();
 					if (event.toElement != null) {
+					
 						switch(event.toElement.innerText) {
 							case "English":
+
+								// temp test
+								//self.createNewProjectFolder("/Users/sheldon/Documents/dev/Choreo/tests/G9");
+
 								$.post("/setLanguage/en", {}, function() {
 									window.location.reload();					    	
 								});
@@ -262,7 +268,7 @@
 		};
 
 		ChoreoEditor.prototype.selectSaveLocation = function() {
-			this.saveAsDialog.trigger('click');  
+			this.saveAsDialog.show().trigger('click');  
 		};
 
 		/** Loads a game from a file on the local disk.  Current assumption is that this
@@ -281,7 +287,7 @@
 
 			_c.set(this.uiState, 'data/modalState', "None");
 
-			$.getJSON( this.apiRoot + "files?path=" + encodeURIComponent(path), function(data) {
+			$.getJSON( this.apiRoot + "files?path=" + encodeURIComponent(path) + "&fileName=contents.json", function(data) {
 				if (data != null && data.status != 'error') {
 
 					// don't need the scrim anymore
@@ -313,42 +319,64 @@
 
 			var self = this;
 
+			 $.ajax(self.apiRoot + 'files/game?path=' + encodeURIComponent(path), {
+				type: 'POST',   // we are "posting" a new game, but really the server is doing the content creation
+				data: JSON.stringify({}),
+				contentType: 'application/json',
+//				data: JSON.stringify(newGame),
+//				contentType: 'application/json',
+				success: function(response) { 
+					if (response != null && response.status != 'error') {
+						// don't need the scrim anymore
+						$('.boot-screen').hide();
+						$('.scrim.full').hide();
+
+						_c.set(self.uiState, 'data/currentProject', path);
+
+						self.setNewGameData.apply(self, [response.data]);
+					}
+				},
+				error  : function(err) {
+					alert ("Sorry, something went wrong:\n\n" + err.responseText);
+				}
+			});
+
+
+
 			// We get the JSON of the default "empty game" from the server, then we tell the server to write this JSON
 			// to the location on disk chosen by the user.  Server creates the new directory if needed.
 
-			console.log("Saving As...");
-
 			// TBD: need different delim for Windows?
 
-			$.getJSON( this.apiRoot + "games/EmptyGame", function(data) {
-				if (data != null && data.status != 'error') {
+			// $.getJSON( this.apiRoot + "games/EmptyGame", function(data) {
+			// 	if (data != null && data.status != 'error') {
 
-					var newGame = data;
+			// 		var newGame = data;
 
-					// delete extra data aggregated by server
-					if (newGame._refs != null) delete newGame._refs;
+			// 		// delete extra data aggregated by server
+			// 		if (newGame._refs != null) delete newGame._refs;
 
-					 $.ajax(self.apiRoot + 'files?path=' + encodeURIComponent(path + '/') + '&fileName=contents.json', {
-						type: 'POST',
-						data: JSON.stringify(newGame),
-						contentType: 'application/json',
-						success: function(response) { 
-							// don't need the scrim anymore
-							$('.boot-screen').hide();
-							$('.scrim.full').hide();
+			// 		 $.ajax(self.apiRoot + 'files?path=' + encodeURIComponent(path + '/') + '&fileName=contents.json', {
+			// 			type: 'POST',
+			// 			data: JSON.stringify(newGame),
+			// 			contentType: 'application/json',
+			// 			success: function(response) { 
+			// 				// don't need the scrim anymore
+			// 				$('.boot-screen').hide();
+			// 				$('.scrim.full').hide();
 
-							self.setNewGameData.apply(self, [newGame]);
-						},
-						error  : function(err) {
-							alert ("Sorry, something went wrong:\n\n" + err.responseText);
-						}
-					});
+			// 				self.setNewGameData.apply(self, [newGame]);
+			// 			},
+			// 			error  : function(err) {
+			// 				alert ("Sorry, something went wrong:\n\n" + err.responseText);
+			// 			}
+			// 		});
 
-				}
-				else {
-					alert ("Sorry, something went wrong:\n\n" + data.message);
-				}
-			});
+			// 	}
+			// 	else {
+			// 		alert ("Sorry, something went wrong:\n\n" + data.message);
+			// 	}
+			// });
 
 			_c.set(this.uiState, 'data/modalState', "None");
 
