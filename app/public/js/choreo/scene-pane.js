@@ -149,7 +149,17 @@ if (!ChoreoScenePane) {
 			var finalLayerItem = $layerItemTemplate.clone().removeClass('template');
 
 			a = finalLayerItem.find('a');
-			a.click(function () {
+			a.click(function (event) {
+					event.preventDefault();
+					event.stopPropagation();
+					var menu = $( ".mega-menu");
+					menu.offset(a.offset());
+					// menu.position({
+					// 	my: "left top",
+					// 	at: "left bottom",
+					// 	of: a
+					// });
+					menu.show();			
 				console.log("user added a layer; kick off mega-menu to select type.");
 			});
 

@@ -23,6 +23,11 @@
 			this.galleryPane = new ChoreoGalleryPane();
 			this.codeEditor = new ChoreoCodeEditor();
 
+			// NOTE: web app needs its own module for storage
+			if (_c.hostEnvironment == "desktop") {
+				this.storage = new ChoreoStorage();
+			}
+
 			this.directoryOpenDialog = null;
 		};
 
@@ -35,6 +40,10 @@
 			this.kitPane.init();
 			this.galleryPane.init();
 			this.codeEditor.init();
+
+			if (_c.hostEnvironment == "desktop") {
+				this.storage.init();
+			}
 
 			// UI variants based on the host platform.  UI can't be completely agnostic to this, right?
 
@@ -86,8 +95,9 @@
 
 			$('html').click(function() {
 				//Hide any visible menus if a click propagates up to the body
-				$( ".file-menu").hide();
-				$( ".language-menu").hide();
+				$(".file-menu").hide();
+				$(".language-menu").hide();
+				$(".mega-menu").hide();
 			});
 
 			$( ".file-menu").menu({
@@ -196,6 +206,16 @@
 					menu.show();
 			});
 
+			var megaMenuItems = $(".mega-menu-category-item");
+			for (var i=0; i<megaMenuItems.length; i++) {
+				var item = $(megaMenuItems[i]);
+				item.click(function(event) {
+					var layerId = $(event.target).data('id');
+					self.addLayer.apply(self, [layerId]);
+					$('.mega-menu').hide();
+				});
+			}
+
 			this.directoryOpenDialog = $('#directoryOpenDialog');
 			this.directoryOpenDialog.change(function(evt) {
 
@@ -271,6 +291,18 @@
 			this.saveAsDialog.show().trigger('click');  
 		};
 
+		ChoreoEditor.prototype.addLayer = function(layerId) {
+
+			var currentSceneIndex = _c.get(this.uiState, 'data/currentSceneIndex');
+			var pathToKits = "gameData/scenes/" + currentSceneIndex + "/kits";
+			var currentLayerArray = _c.get(_c.editor, pathToKits);
+
+			if (!currentLayerArray || !Array.isArray(currentLayerArray)) return;
+
+			// append by "inserting" at an index one greater than the last element.
+			_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, layerId);
+		};
+
 		/** Loads a game from a file on the local disk.  Current assumption is that this
 		 * function is only called in Desktop mode.  A corollary to that is that apiRoot
 		 * shoiuld be "api/v1" or the like.
@@ -318,6 +350,8 @@
 			// NOTE: currently we use this routine only for saving out a blank/new game.  No Save As in the UI for now.
 
 			var self = this;
+
+			_c.set(this.uiState, 'data/modalState', "None");
 
 			 $.ajax(self.apiRoot + 'files/game?path=' + encodeURIComponent(path), {
 				type: 'POST',   // we are "posting" a new game, but really the server is doing the content creation

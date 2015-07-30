@@ -223,7 +223,8 @@
 			return true;
 		},
 
-		// insert an item into an array at an index specified as the leaf of propPath
+		// insert an item into an array at an index specified as the leaf of propPath; allow appending via 
+		// a propPath that ends with an index equal to the length of the array.
 		insert: function(obj, propPath, value) {
 
 			if (!propPath)
@@ -245,8 +246,12 @@
 
 				var index = parseInt(prop);
 				if (!isNaN(index)) {   // integer properties are expected to be array indices
-					if (Array.isArray(parent)) {
-						parent.splice(index, 0, value);
+					if (Array.isArray(parent) && index >= 0 && index <= parent.length) {
+						if (index == parent.length) {
+							parent.push(value);
+						} else {
+							parent.splice(index, 0, value);
+						}
 					} else {
 						return false;
 					}

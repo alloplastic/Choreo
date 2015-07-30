@@ -34,5 +34,10 @@
 	"Create_New_Project_Folder": "Create_New_Project_Folder",
 	"Open_Existing_Project_Folder": "Open_Existing_Project_Folder",
 	"Create New Project Folder": "Create New Project Folder",
-	"Open Existing Project Folder": "Open Existing Project Folder"
+	"Open Existing Project Folder": "Open Existing Project Folder",
+	"Game Engines": "Game Engines",
+	"2D Game (Phaser)": "2D Game (Phaser)",
+	"Text": "Text",
+	"Text Adventure (TBD)": "Text Adventure (TBD)",
+	"Language Tools (TBD)": "Language Tools (TBD)"
 }

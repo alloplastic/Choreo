@@ -9,12 +9,61 @@
 @choreo-font-size-normal: 12px;
 @choreo-font-size-small: 10px;
 
+// text styles
+
+.text-normal() {
+	font-size: @choreo-font-size-normal;
+	font-style: normal;
+}
+
+.text-subheading() {
+	font-size: @choreo-font-size-normal;
+	font-weight: bold;
+}
+
+// Choreo global UI components
+
 .droppable-active {
 	border-color: @choreo-item-color-selected;
 }
 
 .droppable-hover {
 	border-width: 3px;
+}
+
+.choreo-menu() {
+	position: absolute;
+	top: -1000px;
+}
+
+.mega-menu {
+	.choreo-menu();
+	z-index: 1000;
+	background-color: @choreo-item-color-default;
+	border: 1px solid @choreo-item-color-default;
+	padding: .5em .5em .5em 0em;
+
+	ul {
+		list-style-type: none;
+		margin: 0em 0em 0em .5em;
+		padding: 0em;
+		vertical-align: top;
+	}
+//	width: 50em;
+//	height: 20em;
+}
+
+.mega-menu-category {
+	display: inline-block;;
+}
+
+.mega-menu-category-title {
+	.text-subheading();
+}
+
+.mega-menu-category-item {
+	.text-normal();   // TBD: text-link?
+	cursor: pointer;
 }
 
 ////// jQuery UI overrides ///////
