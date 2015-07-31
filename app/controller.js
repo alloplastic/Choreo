@@ -313,14 +313,7 @@ ParentController.prototype.__processPage = function() {
 					// chache data for new kits
 					for (r=0; r<kitResponses.length; r++) {
 						kit = kitResponses[r];
-						// TBD: might need to rethink this once binary files are stored on a separate server; but maybe
-						// the API remains the same
-						if (kit.icon != null && kit.icon.length>0 && kit.id != null && kit.id.length>0) {
-							// TBD: branch here based on hostEnvironment=web to call into the database.
-							url = "http://" + self.__req.headers.host + "/data/kits/" + kit.id + "/" + kit.icon;
-							kit.icon = url;
-						}
-						self.app.kitCache[kit.id] = kit;
+						self.processKitData.apply(self, [kit]);
 					}
 
 					self.addKitDataToGame.call(self, result);
@@ -348,6 +341,19 @@ ParentController.prototype.__processPage = function() {
 		// let calling code know to let the above promise handle the response
 		return true;
 
+	};
+
+	ParentController.prototype.processKitData = function(kit) {
+
+		// TBD: might need to rethink this once binary files are stored on a separate server; but maybe
+		// the API remains the same
+		if (kit.icon != null && kit.icon.length>0 && kit.id != null && kit.id.length>0) {
+			// TBD: branch here based on hostEnvironment=web to call into the database.
+			url = "http://" + this.__req.headers.host + "/data/kits/" + kit.id + "/" + kit.icon;
+			kit.icon = url;
+		}
+
+		this.app.kitCache[kit.id] = kit;
 	};
 
 	/**
@@ -405,42 +411,48 @@ ParentController.prototype.__processPage = function() {
 		var kit, kitId, i, r, url;
 		var self = this;
 
-		var entityTypesNeeded = [];
-
 		try {
 
+			var promises = [];
 			for (kitId in result._refs.kits) {
 				kit = result._refs.kits[kitId];
-				for (i=0; i<kit.entityTypes.length; i++) {
-					var entityId = kit.entityTypes[i];
-					if (entityId != null && this.app.entityTypeCache[entityId] == null && entityTypesNeeded.indexOf(entityId) == -1) {
-						entityTypesNeeded.push(entityId);
-					}
+				
+				var promiseList = this.queryEntityTypesForKit(kit);
+
+				for (i=0; i<promiseList.length; i++) {
+					promises.push(promiseList[i]);
 				}
 			}
 
-			if (entityTypesNeeded.length<=0) return false;   // let calling code know there's no need to wait; we have all of the data
+			if (promises.length<=0) return false;   // let calling code know there's no need to wait; we have all of the data
 
-			var promises = [];
-			for (i=0; i<entityTypesNeeded.length; i++) {
-				// TBD: branch here based on hostEnvironment=web to call into the database.
-				url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityTypesNeeded[i] + "/contents.json";
-				var p = this._getJSON(url);
-				p.timeout(30000, "ERROR - Entity Type request for " + entityTypesNeeded[i] + " timed out after 30000 ms.");
-				promises.push(p);								
-			}
+			// for (kitId in result._refs.kits) {
+			// 	kit = result._refs.kits[kitId];
+
+			// 	for (i=0; i<kit.entityTypes.length; i++) {
+			// 		var entityId = kit.entityTypes[i];
+			// 		if (entityId != null && this.app.entityTypeCache[entityId] == null && entityTypesNeeded.indexOf(entityId) == -1) {
+			// 			entityTypesNeeded.push(entityId);
+			// 		}
+			// 	}
+			// }
+
+			// if (entityTypesNeeded.length<=0) return false;   // let calling code know there's no need to wait; we have all of the data
+
+			// var promises = [];
+			// for (i=0; i<entityTypesNeeded.length; i++) {
+			// 	// TBD: branch here based on hostEnvironment=web to call into the database.
+			// 	url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityTypesNeeded[i] + "/contents.json";
+			// 	var p = this._getJSON(url);
+			// 	p.timeout(30000, "ERROR - Entity Type request for " + entityTypesNeeded[i] + " timed out after 30000 ms.");
+			// 	promises.push(p);								
+			// }
 
 			Q.all(promises)
 			.then(function(entityTypeResponses) {
 				// chache data for new entity types
 				for (r=0; r<entityTypeResponses.length; r++) {
-					var entityType = entityTypeResponses[r];
-					if (entityType.icon != null && entityType.icon.length>0 && entityType.id != null && entityType.id.length>0) {
-						// TBD: branch here based on hostEnvironment=web to call into the database.
-						url = "http://" + self.__req.headers.host + "/data/entityTypes/" + entityType.id + "/" + entityType.icon;
-						entityType.icon = url;
-					}
-					self.app.entityTypeCache[entityType.id] = entityType;
+					self.processEntityTypeData.apply(self, [entityTypeResponses[r]]);					
 				}
 
 				// call function to decorate the gameData with _refs from (now complete) caches								
@@ -457,6 +469,48 @@ ParentController.prototype.__processPage = function() {
 		}
 
 		return true;  // let calling code know to let the above promise handle the response
+	};
+
+	// fires off queries for all of the entities associeated with a kit that have not yet been cached by this
+	// instance of Node.  Returns an array of promises, an empty array meaning that all related entity data is
+	// already cached.
+
+	ParentController.prototype.queryEntityTypesForKit = function(kit) {
+
+		var i;
+		var entityTypesNeeded = [];
+		var promises = [];
+
+
+		for (i=0; i<kit.entityTypes.length; i++) {
+			var entityId = kit.entityTypes[i];
+			if (entityId != null && this.app.entityTypeCache[entityId] == null && entityTypesNeeded.indexOf(entityId) == -1) {
+				entityTypesNeeded.push(entityId);
+			}
+		}
+
+		if (entityTypesNeeded.length<=0) return promises;   // let calling code know there's no need to wait; we have all of the data
+
+		for (i=0; i<entityTypesNeeded.length; i++) {
+			// TBD: branch here based on hostEnvironment=web to call into the database.
+			url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityTypesNeeded[i] + "/contents.json";
+			var p = this._getJSON(url);
+			p.timeout(30000, "ERROR - Entity Type request for " + entityTypesNeeded[i] + " timed out after 30000 ms.");
+			promises.push(p);
+		}
+
+		return promises;
+	};
+
+	ParentController.prototype.processEntityTypeData = function(entityType) {
+
+		if (entityType.icon != null && entityType.icon.length>0 && entityType.id != null && entityType.id.length>0) {
+			// TBD: branch here based on hostEnvironment=web to call into the database.
+			url = "http://" + this.__req.headers.host + "/data/entityTypes/" + entityType.id + "/" + entityType.icon;
+			entityType.icon = url;
+		}
+
+		this.app.entityTypeCache[entityType.id] = entityType;
 	};
 
 	/**
@@ -550,24 +604,26 @@ ParentController.prototype.__processPage = function() {
 
 	ParentController.prototype._putJSON = function(url, content) {
 
+		// TBD: does this try-catch structure make sense here?
+
 		try {
-		// construct a "request" object to pass to Request.js
-		var requestObj = {
-			uri: url,
-			method: 'PUT',
-//			json: true,
-//			body: content,
-			body: JSON.stringify(content),
-			headers: {"Content-Type": "application/json"}
-//			headers: {"Content-Type": "application/x-www-form-urlencoded"}
-		};
+			// construct a "request" object to pass to Request.js
+			var requestObj = {
+				uri: url,
+				method: 'PUT',
+	//			json: true,
+	//			body: content,
+				body: JSON.stringify(content),
+				headers: {"Content-Type": "application/json"}
+	//			headers: {"Content-Type": "application/x-www-form-urlencoded"}
+			};
 
-		// a promise-based call to the data stub URL
-		return this.__request(requestObj);
+			// a promise-based call to the data stub URL
+			return this.__request(requestObj);
 
-		} catch (e) {
-			resLocal.json({status: "error", message: e.message});
-		}
+			} catch (e) {
+				resLocal.json({status: "error", message: e.message});
+			}
 
 	};
 

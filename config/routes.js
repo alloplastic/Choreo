@@ -34,6 +34,9 @@ module.exports = function routes() {
 	// the game definition itself
 	this.match('stubAPI/games/:gameId', { controller: 'stubAPI', action: 'getGame', via: ['GET'] });
 
+	// get a specific kit and its associated data
+	this.match('stubAPI/kits/:kitId', { controller: 'stubAPI', action: 'getKit', via: ['GET'] });
+
 	// to parallel the functionality under "files," the main API will probably need this functional endpoint for
 	// creating a new game in the system and returning its id.
 	// TBD...

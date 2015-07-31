@@ -9,7 +9,7 @@ if (!ChoreoStorage) {
 	ChoreoStorage.prototype.init = function(changes) {
 
 		console.log("storage initializing...");
-		
+
 		// register for notifications about the game data changing
 		_c.observe(_c.editor, "gameData/@@@", this, "onGameDataChanged");
 	};
@@ -40,7 +40,7 @@ if (!ChoreoStorage) {
 
 		if (contents._refs != null) delete contents._refs;
 
-		$.ajax(_c.editor.apiRoot + 'files?path=' + encodeURIComponent(path + '/') + '&fileName=contents.json', {
+		$.ajax(_c.editor.apiRoot + 'files?path=' + encodeURIComponent(path) + '&fileName=contents.json', {
 			type: 'POST',
 			data: JSON.stringify(contents),
 			contentType: 'application/json',

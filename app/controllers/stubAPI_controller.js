@@ -11,7 +11,8 @@ var i18n = require('../../config/extensions/i18n-namespace');
 var Q = require('q');
 
 	/**
-	 * Retrieve a game by name, pulling from a directory of static JSON files
+	 * Retrieve a game by name, pulling from a directory of static JSON files; retrieves additional
+	 * data referenced by the game.
 	 */
 	StubAPIController.getGame = function() {
 
@@ -41,11 +42,93 @@ var Q = require('q');
 	};
 
 	/**
-	 * TBD: create a new game in the system and return the id.  A no-op for the stub, maybem but in the real API
+	 * TBD: create a new game in the system and return the id.  A no-op for the stub, maybe, but in the real API
 	 * this probably involves creating the S3 documents for the main content.json file, defualt entity icon; etc.,
 	 * and then linking these into a record in SimpleDB.
 	 */
 	StubAPIController.newGame = function() {
+
+	};
+
+	/**
+	 * Retrieve a kit by id, plus any referenced data from other parts of the backend.
+	 */
+	StubAPIController.getKit = function() {
+
+		try {
+			var kitId = this.param('kitId');
+			var self = this;
+
+			var resLocal = this.__res;  // must bind variable directly to __res to maintain this pointer context
+
+			// if the kit "contents" record is already cached, move on to the next step
+			if (this.app.kitCache[kitId] != null) {
+				this.addEntitiesToKitResponse(resLocal, kit);
+			}
+
+			// TBD: DB hook
+			url = "http://" + this.__req.headers.host + "/data/kits/" + kitId + "/contents.json";
+
+			this._getJSON(url)
+				
+				.then (
+				function(result) { // success
+					self.processKitData.call(self, result);
+					self.addEntitiesToKitResponse.call(self, resLocal, result);
+				},
+				function(result) {   // failure
+					resLocal.json({status: "error"});
+			});
+
+		} catch (e) {
+			console.log("ERROR - getGame() - " + e.message);
+			resLocal.json({status: "error", message: e.message});
+		}
+	};
+
+	StubAPIController.addEntitiesToKitResponse = function(resLocal, kit) {
+
+		var self = this;
+
+		var promises = this.queryEntityTypesForKit(kit);
+
+		// if all of the entity type data is already cached, send the response
+		if (promises.length <= 0) {
+			this.finalizeKitResponse(resLocal, kit);
+		}
+
+		Q.all(promises)
+		.then(function(entityTypeResponses) {
+			// cache data for new entity types
+			for (r=0; r<entityTypeResponses.length; r++) {
+				self.processEntityTypeData.apply(self, [entityTypeResponses[r]]);					
+			}
+
+			self.finalizeKitResponse.call(self, resLocal, kit);
+
+		})
+		.fail (function(err) {
+			console.log("ERROR - failed to get entity type data. - " + err + " - " + err.message);
+			resLocal.json({status: "error", message: err.message});
+		});
+
+	};
+
+	StubAPIController.finalizeKitResponse = function(resLocal, kit) {
+
+		var data = {};
+
+		data.kit = kit;
+
+		var entityTypes = [];
+		for (var i=0; i<kit.entityTypes.length; i++) {
+			var entityTypeId = kit.entityTypes[i];
+			entityTypes.push(this.app.entityTypeCache[entityTypeId]);
+		}
+
+		data.entityTypes = entityTypes;
+
+		resLocal.json({status: "success", data: data});
 
 	};
 

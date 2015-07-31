@@ -266,7 +266,8 @@
 				});
 			};
 
-			_c.editor.loadGame("TestGame");
+			_c.editor.loadGame("EmptyGame");
+//			_c.editor.loadGame("TestGame");
 
 		};
 
@@ -291,7 +292,10 @@
 			this.saveAsDialog.show().trigger('click');  
 		};
 
-		ChoreoEditor.prototype.addLayer = function(layerId) {
+		// adds a layer (i.e. a "kit") to the current scene
+		ChoreoEditor.prototype.addLayer = function(kitId) {
+			
+			var self = this;
 
 			var currentSceneIndex = _c.get(this.uiState, 'data/currentSceneIndex');
 			var pathToKits = "gameData/scenes/" + currentSceneIndex + "/kits";
@@ -299,8 +303,46 @@
 
 			if (!currentLayerArray || !Array.isArray(currentLayerArray)) return;
 
-			// append by "inserting" at an index one greater than the last element.
-			_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, layerId);
+			// if kit data already exists on the client, create the new layer
+			var gameData = _c.editor.gameData;
+			if (gameData._refs && gameData._refs.kits && gameData._refs.kits[kitId]) {
+				_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, kitId);
+				if (_c.get(_c.editor, 'uiState/data/currentLayer') == -1)
+					_c.set(_c.editor, 'uiState/data/currentLayer', 0);
+				return;
+			}
+
+			// if we don't already have the kit cached, retrieve it from the server
+			$.getJSON( this.apiRoot + "kits/" + kitId, function(data) {
+				if (data != null && data.status != 'error') {
+					self.addKitToGame.call(self, data.data);
+					// append by "inserting" at an index one greater than the last element.
+					_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, kitId);
+					if (_c.get(_c.editor, 'uiState/data/currentLayer') == -1)
+						_c.set(_c.editor, 'uiState/data/currentLayer', 0);
+				}
+			});
+		};
+
+		// parses a /kits response from the server, storing the results in gameData._refs.
+		ChoreoEditor.prototype.addKitToGame = function(kitResponse) {
+
+			var gameData = _c.editor.gameData;
+
+			if (gameData._refs == null) gameData._refs = {};
+			if (gameData._refs.kits == null) gameData._refs.kits = {};
+			if (gameData._refs.entityTypes == null) gameData._refs.entityTypes = {};
+
+			var kit = kitResponse.kit;
+			var entityTypes = kitResponse.entityTypes;
+
+			gameData._refs.kits[kit.id] = kit;
+
+			for (var i=0; i<entityTypes.length; i++) {
+				var entityType = entityTypes[i];
+				gameData._refs.entityTypes[entityType.id] = entityType;
+			}
+
 		};
 
 		/** Loads a game from a file on the local disk.  Current assumption is that this
@@ -315,8 +357,6 @@
 
 			console.log("Opening from file: " + path);
 
-			_c.set(this.uiState, 'data/currentProject', path);
-
 			_c.set(this.uiState, 'data/modalState', "None");
 
 			$.getJSON( this.apiRoot + "files?path=" + encodeURIComponent(path) + "&fileName=contents.json", function(data) {
@@ -327,6 +367,7 @@
 					$('.scrim.full').hide();
 
 					self.setNewGameData.apply(self, [data]);
+					_c.set(this.uiState, 'data/currentProject', path);
 				}
 				else {
 					alert ("Sorry, something went wrong:\n\n" + data.message);
@@ -350,6 +391,7 @@
 			// NOTE: currently we use this routine only for saving out a blank/new game.  No Save As in the UI for now.
 
 			var self = this;
+			var pathLocal = path;
 
 			_c.set(this.uiState, 'data/modalState', "None");
 
@@ -365,9 +407,8 @@
 						$('.boot-screen').hide();
 						$('.scrim.full').hide();
 
-						_c.set(self.uiState, 'data/currentProject', path);
-
 						self.setNewGameData.apply(self, [response.data]);
+						_c.set(_c.editor.uiState, 'data/currentProject', pathLocal);
 					}
 				},
 				error  : function(err) {
