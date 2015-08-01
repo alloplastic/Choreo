@@ -2,6 +2,9 @@
 	"id": "TBD_generate",
 	"choreoVersion": 1,
 	"name": "New Project",
+	"editCount": 0,
+	"editCurrent": 0,
+	"editOldest": 0,
 	"firstScene": "TBD_generate",
 	"scenes": [{
 		"id": "TBD_generate",

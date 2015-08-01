@@ -2,6 +2,9 @@
 	"id": "TestGame",
 	"choreoVersion": 1,
 	"name": "Test Game",
+	"editCount": 0,
+	"editCurrent": 0,
+	"editOldest": 0,
 	"firstScene": "SceneOne",
 	"scenes": [{
 		"id": "SceneOne",

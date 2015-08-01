@@ -8,9 +8,9 @@
 var ParentController = require('./../controller.js');
 var FilesController = new ParentController();
 var i18n = require('../../config/extensions/i18n-namespace');
-//var Q = require('q');
+var Q = require('q');
 var fs = require('fs');
-	 
+var mkdirp = require('mkdirp');
 
 	 /**
 	 * Retrieve a file specified by "path" and "fileName" URL parameters.
@@ -45,8 +45,7 @@ var fs = require('fs');
 			});
 				
 		} catch (e) {
-			console.log("ERROR - FileController - getFile() - " + e.message);
-			resLocal.json({status: "error", message: e.message});
+			this._error(resLocal, "ERROR - FileController - getFile() - " + e.message);
 		}
 
 	};
@@ -62,9 +61,13 @@ var fs = require('fs');
 		try {
 
 			var path = this.param('path');
+			var editPath = this.param('editPath');   // optional path to a folder to record the history of this file write
+			var editSubPath = this.param('editSubPath');   // project-relative path to the file, e.g. /assets/entity5/
 			var fileName = this.param('fileName');
 			var self = this;
 
+			var r;
+			
 			// TBD: branch based on content-type header?  Need to worry about delims?
 			var contents = this.__req.body;
 
@@ -76,19 +79,141 @@ var fs = require('fs');
 			var lastCharOfPath = path.slice(-1);
 			if (lastCharOfPath != '/') path += '/';
 
+			var filePath = path + fileName;
+
 			// TBD: evaluate whether sync functions will cause bottlenecks; probably not for this op
 			if (!fs.existsSync(path)) fs.mkdirSync(path);
 
-			fs.writeFile(path + fileName, JSON.stringify(contents), function (err, result) {
+			// calling code can pass an "edit path" to hold history/undo information
+			if (editPath != null && editPath.length > 0) {
 
-				if (err) throw err;
-				resLocal.json({status: "success"});
-				return;
-			});
-				
+				// make sure that the "edit" directory structure exists
+
+				lastCharOfPath = editPath.slice(-1);
+				if (lastCharOfPath != '/') editPath += '/';
+
+				if (editSubPath == null) {
+					editSubPath = "";
+				} else {
+					lastCharOfPath = editSubPath.slice(-1);
+					if (lastCharOfPath != '/') editSubPath += '/';					
+				}
+				var removedPath = editPath + "removed/" + editSubPath;
+				var writtenPath = editPath + "written/" + editSubPath;
+
+				var removedFilePath = removedPath + fileName;
+				var writtenFilePath = writtenPath + fileName;
+
+				var q1 = Q.defer();
+				mkdirp(removedPath, function (err) {
+					if (err) {
+						q1.reject({status: "error"});
+						self._error(err);
+					}
+					else {
+						q1.resolve({status: "success"});
+					}
+				});
+
+				var q2 = Q.defer();
+				mkdirp(writtenFilePath, function (err) {
+					if (err) {
+						q2.reject({status: "error"});
+						self._error(err);
+					}
+					else {
+						q2.resolve({status: "success"});
+					}
+				});
+
+				// wait for both directories to be created, if necessary
+				Q.all([q1.promise, q2.promise])
+				.then(function(results) {
+
+					for (r=0; r<results.length; r++) {
+						if (results[r].status == 'error') {
+							self._error(resLocal, "ERROR - FileController - putFile - failed to create edit/history directory structure.");
+							return;
+						}
+					}
+
+					// collect (potentially) multiple processes to wait for
+					var promises = [];
+
+					// if the file already exists, and hasn't been archived yet, copy it to the "removed" directory
+					if (fs.existsSync(filePath) && !fs.existsSync(removedFilePath)) {
+
+						var write1Deferred = Q.defer();
+
+						var r = fs.createReadStream(filePath);
+						var w = fs.createWriteStream(removedFilePath);
+						r.pipe(w);
+
+						w.on('finish', function() {
+						  write1Deferred.resolve({status: 'success'});
+						});
+
+						w.on('error', function(err) {
+						  write1Deferred.reject({status: 'error', message: err.message});
+						});
+
+						promises.push(write1Deferred.promise);
+					} 
+
+					var write2Deferred = Q.defer();
+
+					// always write the new version of the destination file to the history
+					fs.writeFile(writtenFilePath, JSON.stringify(contents), function (err, result) {
+						if (err) {
+							write2Deferred.reject({status: 'error'});
+							throw err;
+						}
+						write2Deferred.resolve({status: 'success'});
+					});
+
+					promises.push(write2Deferred.promise);
+
+					Q.all(promises)
+					.then(function(results) {
+
+						for (r=0; r<results.length; r++) {
+							if (results[r].status == 'error') {
+								self._error(resLocal, "ERROR - FileController - putFile - failed to write edit/history files.");
+								return;
+							}
+						}
+
+						// history written successfully; now overwrite the current project file
+						self.finishFileWrite.call(self, resLocal, filePath, contents);
+					})
+					.fail (function(err) {
+						self._error(resLocal, "ERROR - FileController - putFile - failed to write edit/history files.");
+					});
+
+
+				})
+				.fail (function(err) {
+					self._error(resLocal, "ERROR - FileController - putFile - failed to create edit/history directory structure.");
+				});
+
+
+			} else {
+				this.finishFileWrite(resLocal, filePath, contents);
+			}
 		} catch (e) {
-			resLocal.json({status: "error", message: e.message});
+			this._error(resLocal, e.message);
 		}
+
+	};
+
+	FilesController.finishFileWrite = function(resLocal, path, contents) {
+
+		// TBD: automatically branch based on content type?
+
+		fs.writeFile(path, JSON.stringify(contents), function (err, result) {
+			if (err) throw err;
+			resLocal.json({status: "success"});
+		});
 
 	};
 
@@ -116,11 +241,11 @@ var fs = require('fs');
 			return;
 
 		} catch (e) {
-			resLocal.json({status: "error", message: e.message});
+			this._error(resLocal, e.message);
 		}
 
 		// makes sense only when all of the calls in this method are synchronous
-		resLocal.json({status: "error", message: "ERROR - FileController - createDirectory() - Unknown Error."});
+		this._error(resLocal, "ERROR - FileController - createDirectory() - Unknown Error.");
 
 	};
 
@@ -174,23 +299,48 @@ var fs = require('fs');
 
 								function (result) {  // contents.json written successfully
 
-									// create assets directory
-									var assetPath = path + "assets";
-									var assetsDirectoryUrl = "http://" + self.__req.headers.host + self.app.apiRoot + 'files/directory?path=' + encodeURIComponent(assetPath);
+									// build out expected directory structure
 
-									self._putJSON.apply(self, [assetsDirectoryUrl, {}])
+									var assetsPath = path + "assets";
+									var assetsDirectoryUrl = "http://" + self.__req.headers.host + self.app.apiRoot + 'files/directory?path=' + encodeURIComponent(assetsPath);
 
-										.then(
-											function (result) {  // successfully created asset dir
-												// all done creating project dir
-												resLocal.json({status: "success", data: newGame});
-											},
+									var editsPath = path + "edits";
+									var editsDirectoryUrl = "http://" + self.__req.headers.host + self.app.apiRoot + 'files/directory?path=' + encodeURIComponent(editsPath);
 
-											function () { // failed to retrieve default icon
-												info.assetsDirectoryUrl = assetsDirectoryUrl;
-												self._error(resLocal, "ERROR - FileController - newGame - failed to create assets directory.", info);
+									var p1 = self._putJSON.call(self, assetsDirectoryUrl, {});
+									var p2 = self._putJSON.call(self, editsDirectoryUrl, {});
+
+									Q.all([p1, p2])
+									.then(function(results) {
+
+										for (r=0; r<results.length; r++) {
+											if (results[r].status == 'error') {
+												self._error(resLocal, "ERROR - FileController - newGame - failed to create directory structure: " + results[r].message);
+												return;
 											}
-										);
+										}
+
+										// project folder created successfully
+										resLocal.json({status: "success", data: newGame});
+									})
+									.fail (function(err) {
+										self._error(resLocal, "ERROR - FileController - newGame - failed to create directory structure. - " + err + " - " + err.message);
+									});
+
+
+									// self._putJSON.apply(self, [assetsDirectoryUrl, {}])
+
+									// 	.then(
+									// 		function (result) {  // successfully created asset dir
+									// 			// all done creating project dir
+									// 			resLocal.json({status: "success", data: newGame});
+									// 		},
+
+									// 		function () { // failed to retrieve default icon
+									// 			info.assetsDirectoryUrl = assetsDirectoryUrl;
+									// 			self._error(resLocal, "ERROR - FileController - newGame - failed to create assets directory.", info);
+									// 		}
+									// 	);
 
 								},
 								function () {  // error writing contents.json
