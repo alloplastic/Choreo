@@ -55,6 +55,12 @@ grunt watch
 ```
 Auto-recompiles LESS files when they change.
 
+## Testing Native App
+Install node-weblit (nw.js), then run this command from inside the project folder to test the desktop app.
+```
+/Applications/nwjs.app/Contents/MacOS/nwjs .
+```
+
 ## Building Native App
 
 ```

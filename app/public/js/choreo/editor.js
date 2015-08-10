@@ -211,7 +211,7 @@
 				var item = $(megaMenuItems[i]);
 				item.click(function(event) {
 					var layerId = $(event.target).data('id');
-					self.addLayer.apply(self, [layerId]);
+					self.addLayer.call(self, layerId);
 					$('.mega-menu').hide();
 				});
 			}
@@ -276,7 +276,6 @@
 		 * being rendered and edited.
 		 * @method
 		 */
-
 		ChoreoEditor.prototype.initEditorState = function(gameData) {
 
 			if (gameData != null) {
@@ -291,6 +290,21 @@
 		ChoreoEditor.prototype.selectSaveLocation = function() {
 			this.saveAsDialog.show().trigger('click');  
 		};
+
+		/*
+		 * Interface allowing subcomponents to declare when an "edit" or operation is complete.  This advances
+		 * the undo history one step.
+		 * @method
+		 */
+		ChoreoEditor.prototype.nextEdit = function() {
+
+			var editCurrent = _c.get(_c.editor, "gameData/editCurrent");
+			if (editCurrent == null) return;
+
+			editCurrent++;
+
+			_c.set(_c.editor, "gameData/editCurrent", editCurrent);
+		}
 
 		// adds a layer (i.e. a "kit") to the current scene
 		ChoreoEditor.prototype.addLayer = function(kitId) {
@@ -309,6 +323,7 @@
 				_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, kitId);
 				if (_c.get(_c.editor, 'uiState/data/currentLayer') == -1)
 					_c.set(_c.editor, 'uiState/data/currentLayer', 0);
+				_c.editor.nextEdit();   // advance undo stack
 				return;
 			}
 
@@ -320,6 +335,7 @@
 					_c.insert(_c.editor, pathToKits + "/" + currentLayerArray.length, kitId);
 					if (_c.get(_c.editor, 'uiState/data/currentLayer') == -1)
 						_c.set(_c.editor, 'uiState/data/currentLayer', 0);
+					_c.editor.nextEdit();   // advance undo stack
 				}
 			});
 		};
@@ -354,6 +370,7 @@
 		ChoreoEditor.prototype.openFromFile = function(path) {
 
 			var self = this;
+			var pathLocal = path;
 
 			console.log("Opening from file: " + path);
 
@@ -366,8 +383,8 @@
 					$('.boot-screen').hide();
 					$('.scrim.full').hide();
 
-					self.setNewGameData.apply(self, [data]);
-					_c.set(this.uiState, 'data/currentProject', path);
+					self.setNewGameData.call(self, data);
+					_c.set(_c.editor.uiState, 'data/currentProject', pathLocal);
 				}
 				else {
 					alert ("Sorry, something went wrong:\n\n" + data.message);
@@ -407,7 +424,7 @@
 						$('.boot-screen').hide();
 						$('.scrim.full').hide();
 
-						self.setNewGameData.apply(self, [response.data]);
+						self.setNewGameData.call(self, response.data);
 						_c.set(_c.editor.uiState, 'data/currentProject', pathLocal);
 					}
 				},

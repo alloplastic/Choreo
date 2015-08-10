@@ -18,5 +18,20 @@
 	"Save": "Save",
 	"Load": "Load",
 	"Export to Desktop": "Export to Desktop",
-	"Export to Mobile": "Export to Mobile"
+	"Export to Mobile": "Export to Mobile",
+	"Create New Project Folder": "Create New Project Folder",
+	"Open Existing Project Folder": "Open Existing Project Folder",
+	"- 1 -": "- 1 -",
+	"Save As": "Save As",
+	"Open": "Open",
+	"Export to ZIP": "Export to ZIP",
+	"Import from ZIP": "Import from ZIP",
+	"Publish to Desktop": "Publish to Desktop",
+	"Publish to Mobile": "Publish to Mobile",
+	"Game Engines": "Game Engines",
+	"2D Game (Phaser)": "2D Game (Phaser)",
+	"Text": "Text",
+	"Text Adventure (TBD)": "Text Adventure (TBD)",
+	"Language Tools (TBD)": "Language Tools (TBD)",
+	"Add a new layer...": "Add a new layer..."
 }

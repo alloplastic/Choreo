@@ -116,7 +116,7 @@ var mkdirp = require('mkdirp');
 				});
 
 				var q2 = Q.defer();
-				mkdirp(writtenFilePath, function (err) {
+				mkdirp(writtenPath, function (err) {
 					if (err) {
 						q2.reject({status: "error"});
 						self._error(err);

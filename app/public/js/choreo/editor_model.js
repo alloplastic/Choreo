@@ -25,6 +25,7 @@ if (!ChoreoEditorModel) {
 				currentLayer: 0,
 				currentEntity: "",
 				modalState: "None",
+				editCurrent: 0,
 				playerState: {
 					// TBD
 				}

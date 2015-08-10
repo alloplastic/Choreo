@@ -39,6 +39,7 @@ if (!ChoreoScenePane) {
 					newScene.name = '- ' + (scenes.length + 1) + ' -';
 					scenes.push(newScene);
 					_c.set(_c.editor, 'gameData/scenes', scenes);
+					_c.editor.nextEdit();   // advance undo stack
 				}
 				_c.editor.uiState.setCurrentScene(ui.newTab.index());
 			}
