@@ -299,7 +299,10 @@
 		ChoreoEditor.prototype.nextEdit = function() {
 
 			var editCurrent = _c.get(_c.editor, "gameData/editCurrent");
-			if (editCurrent == null) return;
+			if (editCurrent == null) {
+				_c.set(_c.editor, "gameData/editCurrent", 1);
+				return;
+			}
 
 			editCurrent++;
 
