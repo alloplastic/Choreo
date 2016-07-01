@@ -1,12 +1,14 @@
-// The library of instandces/entities in the scene
+// The library of instances/entities in the scene
 
-// TBD: every game has a unique ID that can be used to prefix and therfore distinguish assets within a game.
+// TBD: every game has a unique ID that can be used to prefix and therefore distinguish assets within a game.
 // So: each entity gets a simple, immutable id based on a counting integer, stored as a global within the game.
 // assets are stored in assets/n/n.jpg.
 
 // TBD: In the future, to play nice with version control & team collaboration, these integers could be embellished with
-// a word or two frpm the firendlyNames of assets/entities, involving the renaming logic that implies.  Regardless,
+// a word or two from the firendlyNames of assets/entities, involving the renaming logic that implies.  Regardless,
 // the user never explicitly manages a folder hierarchy and filenames.
+
+$ = jQuery;
 
 if (!ChoreoGalleryPane) {
 
@@ -41,8 +43,17 @@ if (!ChoreoGalleryPane) {
 			},
 			drop: function( event, ui ) {
 				if (this.currentSceneIndex < 0) return;   // must have a scene to add entities
-				var entity = ui.helper._refs.entityType.defaultEntity;
-				_c.insert(_c.editor, "gameData/scenes/" + this.currentSceneIndex + "/entities/0", entity);
+				// clone a new copy of the starting entity and assign it a number unique among entities
+				// in this scene.
+				
+				// NOTE: This was a first attempt to add this functionality to the UI, after not looking at the
+				// code foe a year.  Not fully realized yet.
+				// var entity = $.extend(true, {}, ui.helper._refs.entityType.defaultEntity);
+				// var curEntityCount = _c.get(_c.editor, "gameData/scenes/" + this.currentSceneIndex + "/entityCounter");
+				// entity.id = curEntityCount;
+				// curEntityCount++;
+				// _c.set(_c.editor, "gameData/scenes/" + this.currentSceneIndex + "/entityCounter", curEntityCount);
+				// _c.insert(_c.editor, "gameData/scenes/" + this.currentSceneIndex + "/entities/0", entity);
 				//self.entities.splice(0, 0, entity);
 			},
 			hoverClass: "droppable-hover"

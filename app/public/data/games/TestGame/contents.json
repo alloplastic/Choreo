@@ -10,6 +10,7 @@
 		"id": "SceneOne",
 		"name": "One",
 		"kits": ["Kit2dGamePhaser_v1"],
+		"entityCounter": 1,
 		"entities": [{
 			"id": "1",
 			"friendlyName": "Logo",
